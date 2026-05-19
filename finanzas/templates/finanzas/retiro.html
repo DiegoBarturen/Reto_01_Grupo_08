@@ -1,0 +1,107 @@
+{% extends "finanzas/base.html" %}
+{% load static %}
+
+{% block title %}Retirar saldo | FairBet Lab{% endblock %}
+
+{% block content %}
+<section class="wallet-hero card card--hero">
+    <div>
+        <div class="eyebrow">Retiro</div>
+        <h1>Retirar saldo de tu billetera</h1>
+        <p class="lead">
+            Elige el metodo de retiro, indica un monto desde S/ 50.00 y confirma la operacion para dejarla registrada.
+        </p>
+    </div>
+    <div class="wallet-hero__pill">
+        <span>Saldo actual</span>
+        <strong>S/ {{ billetera.saldo }}</strong>
+    </div>
+</section>
+
+<section class="wallet-grid wallet-grid--recarga">
+    <article class="card wallet-action">
+        <div class="section-heading">
+            <div>
+                <div class="eyebrow">Formulario</div>
+                <h2>Completa el retiro</h2>
+            </div>
+            <span class="section-heading__chip">Minimo S/ 50.00</span>
+        </div>
+
+        <form method="post" action="{% url 'finanzas:retirar_saldo' %}" class="form-grid">
+            {% csrf_token %}
+            <div class="field">
+                <label>{{ form.metodo.label }}</label>
+                <div class="payment-methods">
+                    {% for radio in form.metodo %}
+                        <label class="payment-method">
+                            {{ radio.tag }}
+                            <span class="payment-method__content">
+                                <strong>{{ radio.choice_label }}</strong>
+                                {% if forloop.first %}
+                                    <small>Alternativa directa para derivar el retiro a una tarjeta virtual.</small>
+                                {% elif forloop.counter == 2 %}
+                                    <small>Opcion orientada a salidas de saldo por cuenta bancaria simulada.</small>
+                                {% else %}
+                                    <small>Canal rapido inspirado en billeteras y transferencias locales.</small>
+                                {% endif %}
+                            </span>
+                        </label>
+                    {% endfor %}
+                </div>
+                {{ form.metodo.errors }}
+            </div>
+
+            <div class="field">
+                <label for="{{ form.monto.id_for_label }}">{{ form.monto.label }}</label>
+                {{ form.monto }}
+                <div class="helptext">Monto minimo permitido: S/ 50.00.</div>
+                {{ form.monto.errors }}
+            </div>
+
+            <div class="quick-amounts" aria-label="Montos sugeridos">
+                <button type="button" class="button button--ghost quick-amount" data-amount="50.00">S/ 50</button>
+                <button type="button" class="button button--ghost quick-amount" data-amount="100.00">S/ 100</button>
+                <button type="button" class="button button--ghost quick-amount" data-amount="150.00">S/ 150</button>
+                <button type="button" class="button button--ghost quick-amount" data-amount="200.00">S/ 200</button>
+            </div>
+
+            <button type="submit" class="button button--primary">Confirmar retiro</button>
+            <a href="{% url 'finanzas:billetera' %}" class="button button--ghost button--full">Volver a billetera</a>
+        </form>
+    </article>
+
+    <article class="card wallet-sidepanel">
+        <div class="section-heading">
+            <div>
+                <div class="eyebrow">Resumen</div>
+                <h2>Condiciones del retiro</h2>
+            </div>
+        </div>
+
+        <div class="summary-list">
+            <div class="summary-list__item">
+                <span>Usuario</span>
+                <strong>{{ user.username }}</strong>
+            </div>
+            <div class="summary-list__item">
+                <span>Saldo disponible</span>
+                <strong>S/ {{ billetera.saldo }}</strong>
+            </div>
+            <div class="summary-list__item">
+                <span>Regla minima</span>
+                <strong>S/ 50.00</strong>
+            </div>
+        </div>
+
+        <div class="spotlight-box">
+            <span class="spotlight-box__label">Confirmacion</span>
+            <p>El retiro se validara contra tu saldo actual y quedara registrado en historial, detalle y auditoria.</p>
+        </div>
+    </article>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'finanzas/billetera.js' %}"></script>
+{% endblock %}

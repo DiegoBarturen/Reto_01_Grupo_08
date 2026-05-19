@@ -1,0 +1,103 @@
+{% extends "finanzas/base.html" %}
+
+{% block title %}Perfil | FairBet Lab{% endblock %}
+
+{% block content %}
+<section class="wallet-hero card card--hero">
+    <div>
+        <div class="eyebrow">Configuracion</div>
+        <h1>Perfil de la cuenta</h1>
+        <p class="lead">
+            Actualiza tus datos personales y administra la seguridad de acceso desde una sola pantalla.
+        </p>
+    </div>
+    <div class="wallet-hero__pill">
+        <span>Saldo actual</span>
+        <strong>S/ {{ billetera.saldo }}</strong>
+    </div>
+</section>
+
+<section class="wallet-grid wallet-grid--perfil">
+    <article class="card wallet-action">
+        <div class="section-heading">
+            <div>
+                <div class="eyebrow">Datos personales</div>
+                <h2>Informacion de la cuenta</h2>
+            </div>
+            <span class="section-heading__chip">Editable</span>
+        </div>
+
+        <form method="post" class="form-grid">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="perfil">
+            {% for field in perfil_form %}
+                <div class="field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <div class="helptext">{{ field.help_text }}</div>
+                    {% endif %}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+            <button type="submit" class="button button--primary">Guardar cambios</button>
+        </form>
+    </article>
+
+    <article class="card wallet-sidepanel">
+        <div class="section-heading">
+            <div>
+                <div class="eyebrow">Seguridad</div>
+                <h2>Cambiar contrasena</h2>
+            </div>
+            <span class="section-heading__chip">Proteccion</span>
+        </div>
+
+        <form method="post" class="form-grid">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="password">
+            {% for field in password_form %}
+                <div class="field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <div class="helptext">{{ field.help_text }}</div>
+                    {% endif %}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+            <button type="submit" class="button button--primary button--full">Actualizar contrasena</button>
+        </form>
+
+        <div class="profile-exit">
+            <span class="spotlight-box__label">Navegacion</span>
+            <p class="muted">Cuando termines aqui, puedes volver a la vista principal de tu billetera.</p>
+            <a href="{% url 'finanzas:billetera' %}" class="button button--ghost button--full">Volver a billetera</a>
+        </div>
+    </article>
+</section>
+
+<section class="card ledger-card">
+    <div class="section-heading">
+        <div>
+            <div class="eyebrow">Resumen de cuenta</div>
+            <h2>Datos actuales</h2>
+        </div>
+    </div>
+
+    <div class="summary-list">
+        <div class="summary-list__item">
+            <span>Usuario</span>
+            <strong>{{ user.username }}</strong>
+        </div>
+        <div class="summary-list__item">
+            <span>Nombre</span>
+            <strong>{{ user.first_name }} {{ user.last_name|default:"" }}</strong>
+        </div>
+        <div class="summary-list__item">
+            <span>Correo</span>
+            <strong>{{ user.email }}</strong>
+        </div>
+    </div>
+</section>
+{% endblock %}

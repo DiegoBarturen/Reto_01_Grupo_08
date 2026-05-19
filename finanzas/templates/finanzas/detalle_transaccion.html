@@ -1,0 +1,74 @@
+{% extends "finanzas/base.html" %}
+
+{% block title %}Detalle del movimiento | FairBet Lab{% endblock %}
+
+{% block content %}
+<section class="wallet-hero card card--hero">
+    <div>
+        <div class="eyebrow">Detalle del movimiento</div>
+        <h1>Detalle del movimiento</h1>
+        <p class="lead">
+            Revisa la informacion registrada para este movimiento: tipo, metodo, monto, fecha y descripcion.
+        </p>
+    </div>
+    <div class="wallet-hero__pill">
+        <span>Movimiento #</span>
+        <strong>{{ transaccion.id }}</strong>
+    </div>
+</section>
+
+<section class="wallet-grid wallet-grid--detalle">
+    <article class="card wallet-sidepanel">
+        <div class="section-heading">
+            <div>
+                <div class="eyebrow">Datos del movimiento</div>
+                <h2>Resumen del registro</h2>
+            </div>
+        </div>
+
+        <div class="summary-list">
+            <div class="summary-list__item">
+                <span>Operacion</span>
+                <strong>{{ transaccion.get_tipo_display }}</strong>
+            </div>
+            <div class="summary-list__item">
+                <span>Metodo</span>
+                <strong>{{ transaccion.get_metodo_display }}</strong>
+            </div>
+            <div class="summary-list__item">
+                <span>Monto</span>
+                <strong>S/ {{ transaccion.monto }}</strong>
+            </div>
+            <div class="summary-list__item">
+                <span>Fecha</span>
+                <strong>{{ transaccion.creado_en|date:"d/m/Y H:i" }}</strong>
+            </div>
+            <div class="summary-list__item">
+                <span>Saldo actual</span>
+                <strong>S/ {{ billetera.saldo }}</strong>
+            </div>
+        </div>
+    </article>
+
+    <article class="card wallet-action">
+        <div class="section-heading">
+            <div>
+                <div class="eyebrow">Descripcion</div>
+                <h2>Detalle del movimiento</h2>
+            </div>
+        </div>
+
+        <div class="spotlight-box">
+            <span class="spotlight-box__label">Registro</span>
+            <p>{{ transaccion.descripcion|default:"Sin descripcion adicional." }}</p>
+        </div>
+
+        <div class="detail-actions">
+            <a href="{% url 'finanzas:descargar_transaccion_pdf' transaccion.id %}" class="button button--primary">Descargar PDF</a>
+            <a href="{% url 'finanzas:recarga' %}" class="button button--primary">Hacer una recarga</a>
+            <a href="{% url 'finanzas:retiro' %}" class="button button--ghost">Hacer un retiro</a>
+            <a href="{% url 'finanzas:billetera' %}" class="button button--ghost">Volver al historial</a>
+        </div>
+    </article>
+</section>
+{% endblock %}

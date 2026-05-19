@@ -120,7 +120,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+LOGIN_URL = 'finanzas:login'
+LOGIN_REDIRECT_URL = 'finanzas:billetera'
+LOGOUT_REDIRECT_URL = 'finanzas:login'
 
 # Configuración de Channels y Redis para WebSockets
 CHANNEL_LAYERS = {

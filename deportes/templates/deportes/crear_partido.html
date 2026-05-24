@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Crear Evento</title>
+    <style>
+        /* Estilos Base - Coherentes con la Cartelera Clara */
+        body { font-family: 'Arial', sans-serif; background-color: #f4f6f8; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 40px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-top: 4px solid #d32f2f; }
+        
+        .header-titulo { color: #d32f2f; text-transform: uppercase; font-weight: 800; font-size: 1.4em; margin-top: 0; margin-bottom: 5px; text-align: center; letter-spacing: 0.5px; }
+        .subtitulo { text-align: center; color: #7f8c8d; font-size: 0.85em; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        /* Formularios Estilizados */
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 6px; color: #2c3e50; font-weight: bold; font-size: 0.9em; }
+        .form-control { width: 100%; padding: 10px 12px; border: 1px solid #cccccc; border-radius: 4px; background-color: #ffffff; color: #333; box-sizing: border-box; font-size: 0.95em; transition: border-color 0.2s; }
+        .form-control:focus { outline: none; border-color: #d32f2f; }
+        
+        /* Sección de Cuotas Integrada */
+        .cuotas-section { background: #f8f9fa; padding: 20px; border-radius: 6px; margin-top: 25px; margin-bottom: 20px; border: 1px solid #e0e0e0; border-left: 4px solid #27ae60; }
+        .cuotas-section h3 { margin-top: 0; color: #27ae60; text-align: center; font-size: 1em; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 0.5px; }
+        .cuotas-grid { display: flex; gap: 15px; }
+        
+        /* Botones de Acción */
+        .btn-submit { width: 100%; padding: 12px; background-color: #d32f2f; color: white; border: none; border-radius: 4px; font-size: 1.1em; cursor: pointer; transition: background-color 0.2s; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-submit:hover { background-color: #b71c1c; }
+        
+        .btn-volver { display: block; text-align: center; margin-top: 20px; color: #3498db; text-decoration: none; font-size: 0.9em; font-weight: bold; }
+        .btn-volver:hover { color: #2980b9; text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header-titulo">Gestión de Eventos</div>
+        <div class="subtitulo">Apertura de partidos y asignación de cuotas</div>
+        
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label>Categoría / Deporte</label>
+                {{ evento_form.deporte }}
+            </div>
+            
+            <div class="form-group">
+                <label id="label-local">Equipo Local</label>
+                {{ evento_form.equipo_local }}
+            </div>
+            
+            <div class="form-group">
+                <label id="label-visitante">Equipo Visitante</label>
+                {{ evento_form.equipo_visitante }}
+            </div>
+            
+            <div class="form-group">
+                <label>Fecha y Hora del Encuentro</label>
+                {{ evento_form.fecha_hora }}
+            </div>
+            
+            <div class="form-group">
+                <label>Estado Inicial del Partido</label>
+                {{ evento_form.estado }}
+            </div>
+
+            <div class="cuotas-section">
+                <h3>💰 Multiplicadores de Cuotas</h3>
+                <div class="cuotas-grid">
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label id="label-cuota-1" style="text-align: center; color: #27ae60;">Local (1)</label>
+                        {{ cuota_form.paga_local }}
+                    </div>
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label style="text-align: center; color: #f1c40f;">Empate (X)</label>
+                        {{ cuota_form.paga_empate }}
+                    </div>
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label id="label-cuota-2" style="text-align: center; color: #c0392b;">Visitante (2)</label>
+                        {{ cuota_form.paga_visitante }}
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">💾 Publicar Evento</button>
+        </form>
+        
+        <a href="{% url 'deportes:cartelera' %}" class="btn-volver">⬅️ Volver a la Cartelera de Usuario</a>
+    </div>
+
+    <script>
+        function adaptarFormulario() {
+            const selectDeporte = document.getElementById('id_deporte');
+            const labelLocal = document.getElementById('label-local');
+            const labelVisitante = document.getElementById('label-visitante');
+            const labelCuota1 = document.getElementById('label-cuota-1');
+            const labelCuota2 = document.getElementById('label-cuota-2');
+
+            if (!selectDeporte) return;
+            const deporte = selectDeporte.value;
+
+            if (deporte === 'UFC') {
+                labelLocal.innerHTML = '🥊 Luchador 1 (Esquina Roja)';
+                labelVisitante.innerHTML = '🥊 Luchador 2 (Esquina Azul)';
+                labelCuota1.innerHTML = 'Luchador 1';
+                labelCuota2.innerHTML = 'Luchador 2';
+            } else if (deporte === 'TENIS') {
+                labelLocal.innerHTML = '🎾 Tenista 1';
+                labelVisitante.innerHTML = '🎾 Tenista 2';
+                labelCuota1.innerHTML = 'Tenista 1';
+                labelCuota2.innerHTML = 'Tenista 2';
+            } else if (deporte === 'ESPORTS') {
+                labelLocal.innerHTML = '🎮 Jugador / Equipo 1';
+                labelVisitante.innerHTML = '🎮 Jugador / Equipo 2';
+                labelCuota1.innerHTML = 'Opción 1';
+                labelCuota2.innerHTML = 'Opción 2';
+            } else {
+                labelLocal.innerHTML = 'Equipo Local';
+                labelVisitante.innerHTML = 'Equipo Visitante';
+                labelCuota1.innerHTML = 'Local (1)';
+                labelCuota2.innerHTML = 'Visitante (2)';
+            }
+        }
+
+        document.getElementById('id_deporte').addEventListener('change', adaptarFormulario);
+        adaptarFormulario();
+    </script>
+</body>
+</html>

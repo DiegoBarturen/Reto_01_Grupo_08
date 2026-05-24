@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartelera Deportiva</title>
+    <style>
+        /* Estilos Base - Diseño Claro y Limpio */
+        body { font-family: 'Arial', sans-serif; background-color: #f4f6f8; color: #333; margin: 0; padding: 20px; }
+        
+        /* Layout Principal: Menú Lateral + Contenido */
+        .layout-principal { display: flex; gap: 20px; max-width: 1200px; margin: 0 auto; align-items: flex-start; }
+        
+        /* Menú Lateral (Sidebar de Deportes) */
+        .sidebar { width: 220px; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); padding: 15px; flex-shrink: 0; }
+        .sidebar h3 { font-size: 1em; color: #7f8c8d; margin-top: 0; margin-bottom: 15px; text-transform: uppercase; }
+        .menu-deportes { list-style: none; padding: 0; margin: 0; }
+        .menu-deportes li { margin-bottom: 5px; }
+        .menu-deportes button { width: 100%; text-align: left; background: none; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 1em; color: #2c3e50; font-weight: bold; transition: 0.2s; display: flex; align-items: center; gap: 10px; }
+        .menu-deportes button:hover { background: #f0f3f4; color: #d32f2f; }
+        .menu-deportes button.active { background: #ffebee; color: #d32f2f; border-left: 4px solid #d32f2f; }
+
+        /* Contenedor de las Tarjetas */
+        .contenido-eventos { flex: 1; }
+        
+        /* Cabecera y Simulador Integrado */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #d32f2f; padding-bottom: 10px; margin-bottom: 20px; }
+        .header-titulo { color: #d32f2f; text-transform: uppercase; font-weight: 800; font-size: 1.5em; margin: 0; }
+        .simulador { display: flex; align-items: center; gap: 10px; background: white; padding: 8px 15px; border-radius: 6px; border: 1px solid #e0e0e0; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .simulador label { font-size: 0.9em; font-weight: bold; color: #7f8c8d; }
+        .simulador input { width: 70px; padding: 5px; border: 1px solid #cfd8dc; border-radius: 4px; font-weight: bold; color: #27ae60; text-align: center; }
+        .simulador input:focus { outline: none; border-color: #d32f2f; }
+
+        .grid-tarjetas { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
+        
+        /* Diseño de la Tarjeta del Partido */
+        .evento-card { background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; transition: box-shadow 0.2s; }
+        .evento-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-color: #bdbdbd; }
+        
+        .card-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.8em; color: #7f8c8d; margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; }
+        .badge-envivo { background-color: #d32f2f; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.9em; animation: blink 1.5s infinite; }
+        @keyframes blink { 50% { opacity: 0.6; } }
+
+        .equipos-container { margin-bottom: 20px; }
+        .equipo { font-size: 1.1em; font-weight: bold; color: #2c3e50; margin-bottom: 5px; display: flex; align-items: center; justify-content: space-between; }
+        
+        /* Botones de Cuotas y Ganancia Potencial */
+        .cuotas-row { display: flex; gap: 8px; }
+        .btn-cuota { flex: 1; background: #f4f6f8; border: 1px solid #e0e0e0; border-radius: 4px; padding: 10px 5px; text-align: center; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; }
+        .btn-cuota:hover { background: #e3e8ec; border-color: #cfd8dc; }
+        .btn-cuota span.opcion { font-size: 0.75em; color: #7f8c8d; margin-bottom: 4px; }
+        .btn-cuota span.valor { font-size: 1.1em; font-weight: bold; color: #2c3e50; }
+        .ganancia-potencial { font-size: 0.75em; color: #27ae60; font-weight: bold; margin-top: 5px; display: none; }
+
+        .sin-eventos { text-align: center; padding: 40px; color: #7f8c8d; font-size: 1.1em; background: white; border-radius: 8px; border: 1px dashed #bdc3c7; }
+    </style>
+</head>
+<body>
+
+    <div class="layout-principal">
+        
+        <aside class="sidebar">
+            <h3>Menú Principal</h3>
+            <ul class="menu-deportes">
+                <li><button class="active" onclick="filtrarDeporte('TODOS', this)">⚽ Mostrar Todos</button></li>
+                <li><button onclick="filtrarDeporte('FUTBOL', this)">⚽ Fútbol</button></li>
+                <li><button onclick="filtrarDeporte('BASKET', this)">🏀 Baloncesto</button></li>
+                <li><button onclick="filtrarDeporte('TENIS', this)">🎾 Tenis</button></li>
+                <li><button onclick="filtrarDeporte('ESPORTS', this)">🎮 eSports</button></li>
+                <li><button onclick="filtrarDeporte('UFC', this)">🥊 UFC</button></li>
+            </ul>
+        </aside>
+
+        <main class="contenido-eventos">
+            
+            <div class="top-bar">
+                <div class="header-titulo">Apuestas Deportivas</div>
+                <div class="simulador">
+                    <label>💰 Simular: S/</label>
+                    <input type="number" id="monto-simulador" placeholder="10" value="10" min="1" onkeyup="calcularGanancias()" onchange="calcularGanancias()">
+                </div>
+            </div>
+
+            <div class="grid-tarjetas">
+                {% if eventos %}
+                    {% for evento in eventos %}
+                    <div class="evento-card" data-categoria="{{ evento.deporte }}">
+                        
+                        <div class="card-header">
+                            <span>📅 {{ evento.fecha_hora|date:"d M - H:i" }} | {{ evento.get_deporte_display }}</span>
+                            {% if evento.estado == 'EN_JUEGO' %}
+                                <span class="badge-envivo">EN VIVO</span>
+                            {% else %}
+                                <span>{{ evento.get_estado_display }}</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="equipos-container">
+                            <div class="equipo">
+                                <span>{{ evento.equipo_local }}</span>
+                            </div>
+                            <div class="equipo">
+                                <span>{{ evento.equipo_visitante }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="cuotas-row">
+                            {% if evento.cuotas %}
+                                <div class="btn-cuota" data-cuota="{{ evento.cuotas.paga_local|stringformat:'f' }}">
+                                    <span class="opcion">Local</span>
+                                    <span class="valor">{{ evento.cuotas.paga_local }}</span>
+                                    <span class="ganancia-potencial"></span>
+                                </div>
+                                <div class="btn-cuota" data-cuota="{{ evento.cuotas.paga_empate|stringformat:'f' }}">
+                                    <span class="opcion">Empate</span>
+                                    <span class="valor">{{ evento.cuotas.paga_empate }}</span>
+                                    <span class="ganancia-potencial"></span>
+                                </div>
+                                <div class="btn-cuota" data-cuota="{{ evento.cuotas.paga_visitante|stringformat:'f' }}">
+                                    <span class="opcion">Visita</span>
+                                    <span class="valor">{{ evento.cuotas.paga_visitante }}</span>
+                                    <span class="ganancia-potencial"></span>
+                                </div>
+                            {% else %}
+                                <div style="width: 100%; text-align: center; font-size: 0.9em; color: #95a5a6; padding: 10px;">Cuotas no asignadas</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="sin-eventos" style="grid-column: 1 / -1;">
+                        No hay eventos disponibles en este momento.
+                    </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 1. Función para el Menú Lateral (Filtro)
+        function filtrarDeporte(deporte, btnClick) {
+            document.querySelectorAll('.menu-deportes button').forEach(b => b.classList.remove('active'));
+            btnClick.classList.add('active');
+
+            const tarjetas = document.querySelectorAll('.evento-card');
+            tarjetas.forEach(tarjeta => {
+                const categoria = tarjeta.getAttribute('data-categoria');
+                if (deporte === 'TODOS' || categoria === deporte) {
+                    tarjeta.style.display = 'block';
+                } else {
+                    tarjeta.style.display = 'none';
+                }
+            });
+        }
+
+        // 2. Función para el Simulador de Ganancias
+        function calcularGanancias() {
+            const montoInput = document.getElementById('monto-simulador').value;
+            const monto = parseFloat(montoInput) || 0;
+            const botones = document.querySelectorAll('.btn-cuota');
+
+            botones.forEach(btn => {
+                const cuotaAttr = btn.getAttribute('data-cuota');
+                if(cuotaAttr) {
+                    const cuota = parseFloat(cuotaAttr.replace(',', '.'));
+                    const spanGanancia = btn.querySelector('.ganancia-potencial');
+
+                    if (monto > 0) {
+                        const ganancia = (monto * cuota).toFixed(2);
+                        // Imprime en letras verdes la ganancia debajo de la cuota
+                        spanGanancia.innerHTML = `Gana S/ ${ganancia}`;
+                        spanGanancia.style.display = 'block';
+                    } else {
+                        spanGanancia.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        // Se asegura de calcular la ganancia al momento de cargar la página (con los S/ 10 por defecto)
+        window.onload = function() {
+            calcularGanancias();
+        };
+    </script>
+</body>
+</html>

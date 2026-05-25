@@ -1,0 +1,56 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FairBet Lab{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'finanzas/styles.css' %}">
+</head>
+<body class="{% block body_class %}theme-shell{% endblock %}">
+    <div class="shell">
+        <header class="site-header">
+            <div class="site-header__inner">
+                <a href="{% url 'finanzas:inicio' %}" class="brand">
+                    <span class="brand__badge">FB</span>
+                    <span>
+                        <strong>FairBet Lab</strong>
+                        <small>Billetera Deportiva Virtual</small>
+                    </span>
+                </a>
+
+                <nav class="site-nav">
+                    {% if user.is_authenticated %}
+                        <span class="site-nav__greeting">Hola, {{ user.first_name|default:user.username }}</span>
+                        <a href="{% url 'finanzas:billetera' %}" class="site-nav__link">Billetera</a>
+                        <a href="{% url 'finanzas:perfil' %}" class="site-nav__link">Perfil</a>
+                        <a href="{% url 'finanzas:logout' %}" class="site-nav__link site-nav__link--ghost">Salir</a>
+                    {% else %}
+                        <a href="{% url 'finanzas:login' %}" class="site-nav__link">Ingresar</a>
+                        <a href="{% url 'finanzas:registro' %}" class="site-nav__link site-nav__link--ghost">Registro</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </header>
+
+        <main class="page-wrap">
+            {% if messages %}
+                <section class="flash-stack" aria-label="Mensajes del sistema">
+                    {% for message in messages %}
+                        <article class="flash flash--{{ message.tags|default:'info' }}">
+                            {{ message }}
+                        </article>
+                    {% endfor %}
+                </section>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer class="site-footer">
+            <p>Plataforma educativa con moneda virtual. No constituye una casa de apuestas.</p>
+        </footer>
+    </div>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

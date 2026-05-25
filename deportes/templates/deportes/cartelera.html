@@ -1,0 +1,147 @@
+{% extends "finanzas/base.html" %}
+
+{% block title %}Cartelera Deportiva | FairBet Lab{% endblock %}
+
+{% block content %}
+<style>
+    /* Estilos inyectados que consumen los colores oscuros de Tomi */
+    .layout-principal { display: flex; gap: 24px; align-items: flex-start; margin-top: 10px; }
+    
+    /* Sidebar de Deportes */
+    .sidebar { width: 240px; background: var(--panel-strong); border-radius: var(--radius-lg); border: 1px solid var(--line); padding: 20px; flex-shrink: 0; box-shadow: var(--shadow); }
+    .sidebar h3 { font-size: 0.85rem; color: var(--accent-strong); margin-top: 0; margin-bottom: 18px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 800; }
+    .menu-deportes { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+    .menu-deportes button { width: 100%; text-align: left; background: rgba(255,255,255,0.03); border: 1px solid transparent; padding: 12px 16px; border-radius: var(--radius-sm); cursor: pointer; font-size: 0.95rem; color: var(--muted); font-weight: 600; transition: 0.2s; display: flex; align-items: center; gap: 12px; }
+    .menu-deportes button:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+    .menu-deportes button.active { background: rgba(255, 122, 26, 0.12); color: var(--accent); border-color: rgba(255, 122, 26, 0.3); font-weight: 800; }
+
+    /* Contenedor Central */
+    .contenido-eventos { flex: 1; }
+    
+    /* Barra Superior */
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+    .header-titulo { color: var(--text); font-size: 1.8rem; margin: 0; font-weight: 800; }
+    
+    /* Simulador */
+    .simulador { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.03); padding: 10px 18px; border-radius: var(--radius-md); border: 1px solid var(--line); }
+    .simulador label { font-size: 0.85rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
+    .simulador input { width: 80px; padding: 8px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); font-weight: 800; color: var(--success); background: var(--bg-soft); text-align: center; font-size: 1.05rem; }
+    .simulador input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255, 122, 26, 0.15); }
+
+    /* Grilla y Tarjetas */
+    .grid-tarjetas { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+    .evento-card { background: var(--panel-strong); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 20px; transition: transform 0.2s, box-shadow 0.2s; }
+    .evento-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--line-strong); }
+    
+    .card-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--muted); margin-bottom: 18px; border-bottom: 1px solid var(--line); padding-bottom: 12px; font-weight: 600; }
+    .badge-envivo { background: rgba(255, 94, 115, 0.15); color: var(--danger); border: 1px solid rgba(255, 94, 115, 0.3); padding: 4px 10px; border-radius: 999px; font-weight: 800; font-size: 0.75rem; animation: pulse 2s infinite; }
+    @keyframes pulse { 50% { opacity: 0.6; } }
+
+    .equipos-container { margin-bottom: 24px; display: grid; gap: 8px; }
+    .equipo { font-size: 1.15rem; font-weight: 700; color: var(--text); }
+    
+    /* Botones Cuotas */
+    .cuotas-row { display: flex; gap: 10px; }
+    .btn-cuota { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px 8px; text-align: center; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; }
+    .btn-cuota:hover { background: rgba(255,255,255,0.07); border-color: var(--accent); }
+    .btn-cuota span.opcion { font-size: 0.75rem; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; font-weight: 800; }
+    .btn-cuota span.valor { font-size: 1.25rem; font-weight: 800; color: var(--text); }
+    .ganancia-potencial { font-size: 0.8rem; color: var(--success); font-weight: 800; margin-top: 8px; display: none; background: rgba(37, 198, 133, 0.1); padding: 4px 8px; border-radius: 4px; }
+
+    .sin-eventos { text-align: center; padding: 48px 20px; background: rgba(255,255,255,0.02); border-radius: var(--radius-lg); border: 1px dashed var(--line-strong); }
+</style>
+
+<div class="layout-principal">
+    <aside class="sidebar">
+        <h3>Filtrar Deporte</h3>
+        <ul class="menu-deportes">
+            <li><button class="active" onclick="filtrarDeporte('TODOS', this)">⚽ Mostrar Todos</button></li>
+            <li><button onclick="filtrarDeporte('FUTBOL', this)">⚽ Fútbol</button></li>
+            <li><button onclick="filtrarDeporte('BASKET', this)">🏀 Baloncesto</button></li>
+            <li><button onclick="filtrarDeporte('TENIS', this)">🎾 Tenis</button></li>
+            <li><button onclick="filtrarDeporte('ESPORTS', this)">🎮 eSports</button></li>
+            <li><button onclick="filtrarDeporte('UFC', this)">🥊 UFC</button></li>
+        </ul>
+    </aside>
+
+    <main class="contenido-eventos">
+        <div class="top-bar">
+            <h1 class="header-titulo">Cartelera de Partidos</h1>
+            <div class="simulador">
+                <label>💰 Simular Apuesta:</label>
+                <input type="number" id="monto-simulador" placeholder="10" value="10" min="1" onkeyup="calcularGanancias()" onchange="calcularGanancias()">
+            </div>
+        </div>
+
+        <div class="grid-tarjetas">
+            {% if eventos %}
+                {% for evento in eventos %}
+                <div class="evento-card" data-categoria="{{ evento.deporte }}">
+                    <div class="card-header">
+                        <span>📅 {{ evento.fecha_hora|date:"d/m/Y - H:i" }} | {{ evento.get_deporte_display }}</span>
+                        {% if evento.estado == 'EN_JUEGO' %}
+                            <span class="badge-envivo">EN VIVO</span>
+                        {% else %}
+                            <span>{{ evento.get_estado_display }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="equipos-container">
+                        <div class="equipo">{{ evento.equipo_local }}</div>
+                        <div class="equipo">{{ evento.equipo_visitante }}</div>
+                    </div>
+                    <div class="cuotas-row">
+                        {% if evento.cuotas %}
+                            <div class="btn-cuota" data-cuota="{{ evento.cuotas.paga_local|stringformat:'f' }}">
+                                <span class="opcion">Local</span><span class="valor">{{ evento.cuotas.paga_local }}</span><span class="ganancia-potencial"></span>
+                            </div>
+                            <div class="btn-cuota" data-cuota="{{ evento.cuotas.paga_empate|stringformat:'f' }}">
+                                <span class="opcion">Empate</span><span class="valor">{{ evento.cuotas.paga_empate }}</span><span class="ganancia-potencial"></span>
+                            </div>
+                            <div class="btn-cuota" data-cuota="{{ evento.cuotas.paga_visitante|stringformat:'f' }}">
+                                <span class="opcion">Visita</span><span class="valor">{{ evento.cuotas.paga_visitante }}</span><span class="ganancia-potencial"></span>
+                            </div>
+                        {% else %}
+                            <div style="width: 100%; text-align: center; font-size: 0.9em; color: var(--accent); padding: 10px; background: rgba(255, 122, 26, 0.1); border-radius: var(--radius-sm);">Cuotas pendientes</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="sin-eventos" style="grid-column: 1 / -1;">
+                    <h3 style="color: var(--text);">No hay eventos disponibles</h3>
+                    <p style="color: var(--muted);">En este momento no hay partidos programados. ¡Vuelve pronto!</p>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+<script>
+    function filtrarDeporte(deporte, btnClick) {
+        document.querySelectorAll('.menu-deportes button').forEach(b => b.classList.remove('active'));
+        btnClick.classList.add('active');
+        const tarjetas = document.querySelectorAll('.evento-card');
+        tarjetas.forEach(tarjeta => {
+            const categoria = tarjeta.getAttribute('data-categoria');
+            tarjeta.style.display = (deporte === 'TODOS' || categoria === deporte) ? 'block' : 'none';
+        });
+    }
+    function calcularGanancias() {
+        const monto = parseFloat(document.getElementById('monto-simulador').value) || 0;
+        document.querySelectorAll('.btn-cuota').forEach(btn => {
+            const cuotaAttr = btn.getAttribute('data-cuota');
+            if(cuotaAttr) {
+                const cuota = parseFloat(cuotaAttr.replace(',', '.'));
+                const spanGanancia = btn.querySelector('.ganancia-potencial');
+                if (monto > 0) {
+                    spanGanancia.innerHTML = `S/ ${(monto * cuota).toFixed(2)}`;
+                    spanGanancia.style.display = 'block';
+                } else {
+                    spanGanancia.style.display = 'none';
+                }
+            }
+        });
+    }
+    window.onload = calcularGanancias;
+</script>
+{% endblock %}

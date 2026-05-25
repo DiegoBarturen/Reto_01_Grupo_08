@@ -1,0 +1,106 @@
+{% extends "finanzas/base.html" %}
+{% load static %}
+
+{% block title %}Recargar saldo | FairBet Lab{% endblock %}
+
+{% block content %}
+<section class="wallet-hero card card--hero">
+    <div>
+        <div class="eyebrow">Recarga</div>
+        <h1>Agregar saldo a tu billetera</h1>
+        <p class="lead">
+            Elige el método de depósito, indica el monto y confirma la recarga para dejarla registrada.
+        </p>
+    </div>
+    <div class="wallet-hero__pill">
+        <span>Saldo actual</span>
+        <strong>S/ {{ billetera.saldo }}</strong>
+    </div>
+</section>
+
+<section class="wallet-grid wallet-grid--recarga">
+    <article class="card wallet-action">
+        <div class="section-heading">
+            <div>
+                <div class="eyebrow">Formulario</div>
+                <h2>Completa la recarga</h2>
+            </div>
+            <span class="section-heading__chip">Registro trazable</span>
+        </div>
+
+        <form method="post" action="{% url 'finanzas:recargar_saldo' %}" class="form-grid">
+            {% csrf_token %}
+            <div class="field">
+                <label>{{ form.metodo.label }}</label>
+                <div class="payment-methods">
+                    {% for radio in form.metodo %}
+                        <label class="payment-method">
+                            {{ radio.tag }}
+                            <span class="payment-method__content">
+                                <strong>{{ radio.choice_label }}</strong>
+                                {% if forloop.first %}
+                                    <small>Opción directa para registrar una recarga al instante.</small>
+                                {% elif forloop.counter == 2 %}
+                                    <small>Representa una recarga vinculada a cuenta bancaria.</small>
+                                {% else %}
+                                    <small>Alternativa rápida inspirada en métodos de pago locales.</small>
+                                {% endif %}
+                            </span>
+                        </label>
+                    {% endfor %}
+                </div>
+                {{ form.metodo.errors }}
+            </div>
+
+            <div class="field">
+                <label for="{{ form.monto.id_for_label }}">{{ form.monto.label }}</label>
+                {{ form.monto }}
+                {{ form.monto.errors }}
+            </div>
+
+            <div class="quick-amounts" aria-label="Montos sugeridos">
+                <button type="button" class="button button--ghost quick-amount" data-amount="20.00">S/ 20</button>
+                <button type="button" class="button button--ghost quick-amount" data-amount="50.00">S/ 50</button>
+                <button type="button" class="button button--ghost quick-amount" data-amount="100.00">S/ 100</button>
+                <button type="button" class="button button--ghost quick-amount" data-amount="200.00">S/ 200</button>
+            </div>
+
+            <button type="submit" class="button button--primary">Confirmar recarga</button>
+            <a href="{% url 'finanzas:billetera' %}" class="button button--ghost button--full">Volver a billetera</a>
+        </form>
+    </article>
+
+    <article class="card wallet-sidepanel">
+        <div class="section-heading">
+            <div>
+                <div class="eyebrow">Resumen</div>
+                <h2>Información del registro</h2>
+            </div>
+        </div>
+
+        <div class="summary-list">
+            <div class="summary-list__item">
+                <span>Usuario</span>
+                <strong>{{ user.username }}</strong>
+            </div>
+            <div class="summary-list__item">
+                <span>Saldo actual</span>
+                <strong>S/ {{ billetera.saldo }}</strong>
+            </div>
+            <div class="summary-list__item">
+                <span>Registro</span>
+                <strong>Historial + auditoria</strong>
+            </div>
+        </div>
+
+        <div class="spotlight-box">
+            <span class="spotlight-box__label">Confirmación</span>
+            <p>La recarga se guardará en tu historial y podrás revisar su detalle en la siguiente pantalla.</p>
+        </div>
+    </article>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'finanzas/billetera.js' %}"></script>
+{% endblock %}

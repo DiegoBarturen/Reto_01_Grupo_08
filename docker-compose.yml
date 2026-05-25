@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: casa_apuestas_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=casa_apuestas_db
+      - POSTGRES_USER=postgres_user
+      - POSTGRES_PASSWORD=postgres_password
+    ports:
+      - "5432:5432"
+  redis:
+    image: redis:7-alpine
+    container_name: casa_apuestas_redis
+    ports:
+      - "6379:6379"
+  web:
+    build: .
+    container_name: casa_apuestas_web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=django-insecure-cambiar-en-produccion
+      - DATABASE_URL=postgres://postgres_user:postgres_password@db:5432/casa_apuestas_db
+      - REDIS_URL=redis://redis:6379/1
+    depends_on:
+      - db
+      - redis
+volumes:
+  postgres_data:

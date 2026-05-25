@@ -1,0 +1,58 @@
+{% extends "finanzas/base.html" %}
+
+{% block title %}Ingresar | FairBet Lab{% endblock %}
+
+{% block content %}
+<section class="auth-layout">
+    <article class="auth-showcase card card--glow">
+        <div class="eyebrow">Experiencia Deportiva</div>
+        <h1>Un acceso con estilo de jornada grande</h1>
+        <p class="lead">
+            Entra a una billetera virtual con una interfaz inspirada en plataformas deportivas modernas:
+            clara, rápida y lista para seguir creciendo.
+        </p>
+
+        <div class="showcase-grid">
+            <div class="showcase-tile">
+                <span class="showcase-tile__label">Seguridad</span>
+                <strong>Control de acceso</strong>
+                <p>Ingreso sencillo con autenticación integrada de Django.</p>
+            </div>
+            <div class="showcase-tile">
+                <span class="showcase-tile__label">Finanzas</span>
+                <strong>Movimientos visibles</strong>
+                <p>Saldo, recargas y trazabilidad presentados de forma ordenada.</p>
+            </div>
+            <div class="showcase-tile">
+                <span class="showcase-tile__label">Escalabilidad</span>
+                <strong>Base lista para crecer</strong>
+                <p>Una UI modular para sumar apuestas, cuotas y panel operador luego.</p>
+            </div>
+        </div>
+    </article>
+
+    <article class="auth-panel card">
+        <div class="auth-panel__header">
+            <div class="eyebrow">Ingreso</div>
+            <h2>Inicia sesion</h2>
+            <p>Usa tus credenciales para entrar a tu cuenta y revisar la billetera virtual.</p>
+        </div>
+
+        <form method="post" class="form-grid">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+            <button type="submit" class="button button--primary button--full">Ingresar a la plataforma</button>
+        </form>
+
+        <p class="auth-panel__meta">
+            Si aun no tienes cuenta, <a href="{% url 'finanzas:registro' %}">crea tu registro aqui</a>.
+        </p>
+    </article>
+</section>
+{% endblock %}

@@ -1,0 +1,173 @@
+{% extends "finanzas/base.html" %}
+
+{% block title %}Billetera | FairBet Lab{% endblock %}
+
+{% block content %}
+<section class="wallet-hero card card--hero">
+    <div>
+        <div class="eyebrow">Panel Financiero</div>
+        <h1>Tu actividad financiera</h1>
+        <p class="lead">
+            Consulta tu saldo, revisa tus movimientos y administra recargas o retiros cuando lo necesites.
+        </p>
+    </div>
+    <div class="wallet-hero__pill">
+        <span>Ultima actualizacion</span>
+        <strong>{{ billetera.actualizado_en|date:"d/m/Y H:i" }}</strong>
+    </div>
+</section>
+
+<section class="wallet-stats">
+    <article class="stat-card stat-card--balance">
+        <span class="stat-card__label">Saldo disponible</span>
+        <strong class="stat-card__value">S/ {{ billetera.saldo }}</strong>
+        <p>Disponible para tus proximas operaciones dentro de la plataforma.</p>
+    </article>
+
+    <article class="stat-card">
+        <span class="stat-card__label">Movimientos registrados</span>
+        <strong class="stat-card__value">{{ transacciones|length }}</strong>
+        <p>Total de movimientos registrados en la cuenta.</p>
+    </article>
+
+    <article class="stat-card">
+        <span class="stat-card__label">Estado</span>
+        <strong class="stat-card__value">Activa</strong>
+        <p>Lista para registrar recargas, retiros y mostrar el detalle de cada movimiento.</p>
+    </article>
+</section>
+
+<section class="wallet-grid">
+    <article class="card wallet-action">
+        <div class="section-heading">
+            <div>
+                <div class="eyebrow">Accion principal</div>
+                <h2>Gestionar saldo</h2>
+            </div>
+            <span class="section-heading__chip">Flujo separado</span>
+        </div>
+
+        <p class="muted">
+            Entra al flujo que necesites para recargar tu billetera o retirar saldo disponible con trazabilidad completa.
+        </p>
+
+        <div class="action-stack">
+            <a href="{% url 'finanzas:recarga' %}" class="button button--primary button--full">
+                Ir a recargar saldo
+            </a>
+            <a href="{% url 'finanzas:retiro' %}" class="button button--ghost button--full">
+                Ir a retirar saldo
+            </a>
+        </div>
+
+        {% if ultima_transaccion %}
+            <div class="spotlight-box">
+                <span class="spotlight-box__label">Ultimo movimiento</span>
+                <p>
+                    {{ ultima_transaccion.get_tipo_display }} por {{ ultima_transaccion.get_metodo_display }}
+                    de S/ {{ ultima_transaccion.monto }} el {{ ultima_transaccion.creado_en|date:"d/m/Y H:i" }}.
+                </p>
+                <a href="{% url 'finanzas:detalle_transaccion' ultima_transaccion.id %}" class="inline-link">
+                    Ver detalle
+                </a>
+            </div>
+        {% endif %}
+    </article>
+
+    <article class="card wallet-sidepanel">
+        <div class="section-heading">
+            <div>
+                <div class="eyebrow">Resumen</div>
+                <h2>Lectura rapida</h2>
+            </div>
+        </div>
+
+        <div class="summary-list">
+            <div class="summary-list__item">
+                <span>Usuario</span>
+                <strong>{{ user.username }}</strong>
+            </div>
+            <div class="summary-list__item">
+                <span>Correo</span>
+                <strong>{{ user.email|default:"No registrado" }}</strong>
+            </div>
+            <div class="summary-list__item">
+                <span>Cuenta creada</span>
+                <strong>{{ billetera.creado_en|date:"d/m/Y" }}</strong>
+            </div>
+        </div>
+
+        <div class="spotlight-box">
+            <span class="spotlight-box__label">Historial</span>
+            <p>Cada movimiento queda registrado con su tipo, metodo, fecha, monto y detalle asociado.</p>
+        </div>
+    </article>
+</section>
+
+<section class="card ledger-card">
+    <div class="section-heading">
+        <div>
+            <div class="eyebrow">Historial</div>
+            <h2>Movimientos de dinero</h2>
+        </div>
+        <span class="section-heading__chip">{{ transacciones|length }} registros</span>
+    </div>
+
+    {% if transacciones %}
+        <form method="post" action="{% url 'finanzas:descargar_transacciones_pdf' %}" class="batch-download">
+            {% csrf_token %}
+            <div class="batch-download__header">
+                <p class="muted">Selecciona uno o varios movimientos para descargarlos juntos en un solo PDF.</p>
+                <button type="submit" class="button button--ghost">Descargar seleccion</button>
+            </div>
+
+            <div class="table-wrap">
+                <table class="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>Seleccion</th>
+                            <th>Operacion</th>
+                            <th>Metodo</th>
+                            <th>Monto</th>
+                            <th>Fecha</th>
+                            <th>Detalle</th>
+                            <th>PDF</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaccion in transacciones %}
+                            <tr>
+                                <td>
+                                    <label class="row-check">
+                                        <input type="checkbox" name="transaccion_ids" value="{{ transaccion.id }}">
+                                        <span>Elegir</span>
+                                    </label>
+                                </td>
+                                <td><span class="status-pill">{{ transaccion.get_tipo_display }}</span></td>
+                                <td>{{ transaccion.get_metodo_display }}</td>
+                                <td class="amount-cell">S/ {{ transaccion.monto }}</td>
+                                <td>{{ transaccion.creado_en|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    <a href="{% url 'finanzas:detalle_transaccion' transaccion.id %}" class="inline-link">
+                                        Ver detalle
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="{% url 'finanzas:descargar_transaccion_pdf' transaccion.id %}" class="inline-link">
+                                        Descargar PDF
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </form>
+    {% else %}
+        <div class="empty-state">
+            <h3>Aun no tienes movimientos registrados</h3>
+            <p>Tus recargas y retiros apareceran aqui apenas registres la primera operacion.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

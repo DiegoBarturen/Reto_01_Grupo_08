@@ -1,5 +1,4 @@
 from io import BytesIO
-
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm

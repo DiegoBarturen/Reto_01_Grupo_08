@@ -36,7 +36,6 @@ def registro(request):
             dni_input = str(form.cleaned_data["dni"]).strip()
             fecha_nac = form.cleaned_data["fecha_nacimiento"]
             
-            # 1. VALIDACIÓN KYC: Mayoría de Edad (mantenemos esto porque es buena práctica)
             hoy = date.today()
             edad = hoy.year - fecha_nac.year - ((hoy.month, hoy.day) < (fecha_nac.month, fecha_nac.day))
             
@@ -44,18 +43,10 @@ def registro(request):
                 messages.error(request, "KYC Rechazado: Debes ser mayor de 18 años.")
                 return render(request, "finanzas/registro.html", {"form": form})
 
-            # =======================================================
-            # 2. VALIDACIÓN DNI: DESACTIVADA PARA EVITAR BLOQUEOS
-            # =======================================================
-            # El sistema ahora solo verifica que sea numérico y tenga 9 dígitos, 
-            # pero no bloquea si el cálculo matemático falla.
             if len(dni_input) != 9 or not dni_input.isdigit():
                 messages.error(request, "El DNI debe tener 9 dígitos.")
                 return render(request, "finanzas/registro.html", {"form": form})
 
-            # =======================================================
-            # 3. CREACIÓN DE USUARIO (KYC APROBADO AUTOMÁTICAMENTE)
-            # =======================================================
             user = form.save()
             
             Perfil.objects.create(
@@ -84,12 +75,9 @@ class LoginUsuarioView(LoginView):
     redirect_authenticated_user = True
     
     def get_success_url(self): 
-        # Si el usuario es administrador o staff, lo mandamos a su panel
         if self.request.user.is_staff or self.request.user.is_superuser:
-            # Usamos la ruta estática directa para evitar errores de nombres
             return "/deportes/dashboard/" 
             
-        # Si es un cliente normal, va a su billetera
         return reverse_lazy("finanzas:billetera")
 
     def get_context_data(self, **kwargs):
@@ -110,26 +98,20 @@ def logout_usuario(request):
 def billetera(request):
     billetera_usuario, _ = Billetera.objects.get_or_create(usuario=request.user)
     
-    # 1. Movimientos financieros (Solo los últimos 5 para no saturar el panel)
     movimientos = billetera_usuario.movimientos.all().order_by('-creado_en')[:5]
     
-    # 2. Estadísticas de apuestas para el Dashboard
     mis_apuestas = request.user.apuestas.all()
     
-    # Contamos apuestas que están corriendo ahora mismo
     apuestas_activas = mis_apuestas.filter(estado=Apuesta.Estado.PENDIENTE).count()
     
-    # Suma de todo el dinero ganado históricamente
     total_ganado = mis_apuestas.filter(estado=Apuesta.Estado.GANADA).aggregate(
         total=Sum('ganancia_potencial')
     )['total'] or Decimal('0.00')
     
-    # Suma de todo el dinero que el usuario ha arriesgado
     total_apostado = mis_apuestas.aggregate(
         total=Sum('monto_apostado')
     )['total'] or Decimal('0.00')
     
-    # Solo las últimas 5 apuestas para la vista rápida
     ultimas_apuestas = mis_apuestas.order_by('-fecha_creacion')[:5]
 
     return render(request, "finanzas/billetera.html", {
@@ -157,21 +139,18 @@ def recargar_saldo(request):
     if request.method != "POST": return redirect("finanzas:recarga")
     
     billetera_usuario, _ = Billetera.objects.select_for_update().get_or_create(usuario=request.user)
-    perfil = Perfil.objects.get(usuario=request.user) # Obtenemos el perfil para los controles
+    perfil = Perfil.objects.get(usuario=request.user)
     
     form = RecargaSaldoForm(request.POST)
     if form.is_valid():
         monto = form.cleaned_data["monto"]
         metodo = form.cleaned_data["metodo"]
         
-        # 1. Validación de Autoexclusión
         hoy = date.today()
         if perfil.autoexcluido_hasta and hoy < perfil.autoexcluido_hasta.date():
             form.add_error("monto", f"Tu cuenta está autoexcluida hasta {perfil.autoexcluido_hasta.strftime('%d/%m/%Y')}.")
             return render(request, "finanzas/recarga.html", {"billetera": billetera_usuario, "form": form}, status=400)
             
-        # 2. Validación de Límite Diario
-        # Sumamos los créditos (recargas) realizados hoy
         total_depositado_hoy = LedgerEntry.objects.filter(
             billetera__usuario=request.user,
             direccion=LedgerEntry.Direccion.CREDIT,
@@ -182,7 +161,6 @@ def recargar_saldo(request):
             form.add_error("monto", f"Excede tu límite diario de S/ {perfil.limite_deposito_diario}. Depositado hoy: S/ {total_depositado_hoy}")
             return render(request, "finanzas/recarga.html", {"billetera": billetera_usuario, "form": form}, status=400)
 
-        # Si pasa las validaciones, procedemos con la transacción
         billetera_casa, _ = Billetera.objects.get_or_create(tipo=Billetera.TipoCuenta.CASA)
         tx_id = uuid.uuid4()
         
@@ -227,24 +205,16 @@ def detalle_transaccion(request, transaccion_id):
     messages.info(request, "El detalle individual de transacción está en mantenimiento por la nueva Partida Doble.")
     return redirect('finanzas:billetera')
 
-
-# ==========================================
-# GENERADORES DE PDF (REPORTLAB)
-# ==========================================
-
 @login_required
 def descargar_ticket_apuesta_pdf(request, apuesta_id):
-    """Genera un Ticket de Apuesta real"""
     apuesta = get_object_or_404(Apuesta, id=apuesta_id, usuario=request.user)
     
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer, pagesize=letter)
     
-    # Nombre del archivo al descargar
     filename = f"Ticket_Apuesta_{apuesta.id}_{apuesta.evento.equipo_local[:3]}_vs_{apuesta.evento.equipo_visitante[:3]}.pdf"
     p.setTitle(filename)
 
-    # Cabecera
     p.setFont("Helvetica-Bold", 22)
     p.setFillColor(colors.HexColor("#FF7A1A"))
     p.drawString(50, 740, "FAIRBET LAB")
@@ -253,20 +223,17 @@ def descargar_ticket_apuesta_pdf(request, apuesta_id):
     p.drawString(50, 715, "TICKET DE APUESTA DEPORTIVA")
     p.line(50, 705, 550, 705)
     
-    # Datos del Ticket
     p.setFont("Helvetica", 12)
     p.drawString(50, 680, f"Ticket ID: #{apuesta.id}")
     p.drawString(50, 660, f"Fecha de Emisión: {apuesta.fecha_creacion.strftime('%d/%m/%Y %H:%M')}")
     p.drawString(50, 640, f"Titular: {request.user.username}")
     
-    # Datos del Evento
     p.setFont("Helvetica-Bold", 14)
     p.drawString(50, 600, "Detalles del Evento:")
     p.setFont("Helvetica", 12)
     p.drawString(50, 580, f"Partido: {apuesta.evento.equipo_local} vs {apuesta.evento.equipo_visitante}")
     p.drawString(50, 560, f"Deporte: {apuesta.evento.get_deporte_display()}")
     
-    # Datos de la Jugada
     p.setFont("Helvetica-Bold", 14)
     p.drawString(50, 520, "Detalles de la Jugada:")
     p.setFont("Helvetica", 12)
@@ -275,18 +242,15 @@ def descargar_ticket_apuesta_pdf(request, apuesta_id):
     
     p.line(50, 450, 550, 450)
     
-    # Resumen Financiero
     p.setFont("Helvetica-Bold", 14)
     p.drawString(50, 420, f"Monto Apostado: S/ {apuesta.monto_apostado:.2f}")
     p.setFillColor(colors.HexColor("#27ae60"))
     p.drawString(50, 400, f"Ganancia Potencial: S/ {apuesta.ganancia_potencial:.2f}")
     
-    # Estado
     p.setFillColor(colors.black)
     p.setFont("Helvetica", 12)
     p.drawString(50, 360, f"Estado del Ticket: {apuesta.estado}")
     
-    # Pie de página legal
     p.setFont("Helvetica-Oblique", 9)
     p.setFillColor(colors.gray)
     p.drawString(50, 100, "Plataforma Educativa - Sin valor comercial. Ley N° 31557 y DS N° 005-2023-MINCETUR.")
@@ -306,12 +270,11 @@ def descargar_transaccion_pdf(request, transaccion_id):
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer, pagesize=letter)
     
-    # Nombre correcto para recibos financieros
     filename = f"Recibo_Financiero_{transaccion.transaction_id}.pdf"
     p.setTitle(filename)
 
     p.setFont("Helvetica-Bold", 20)
-    p.setFillColor(colors.HexColor("#D4AF37")) # Color Oro
+    p.setFillColor(colors.HexColor("#D4AF37")) 
     p.drawString(50, 750, "FAIRBET LAB")
     
     p.setFont("Helvetica", 14)
@@ -347,7 +310,6 @@ def descargar_transaccion_pdf(request, transaccion_id):
 @login_required
 def descargar_transacciones_pdf(request):
     """Genera un reporte PDF con multiples transacciones (Descarga por Lotes)"""
-    # Mantenemos este igual, solo asegurándonos del nombre
     if request.method == 'POST':
         transaccion_ids = request.POST.getlist('transaccion_ids')
         if not transaccion_ids:

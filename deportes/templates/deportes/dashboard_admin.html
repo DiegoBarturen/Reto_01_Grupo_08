@@ -3,75 +3,449 @@
 {% block title %}Panel Contable | FairBet Lab{% endblock %}
 
 {% block content %}
-<div style="max-width: 1200px; margin: 0 auto; padding: 20px;">
-    
-    <div style="background: linear-gradient(135deg, #111923, #1f2d3d); padding: 30px; border-radius: 12px; margin-bottom: 25px; border-left: 5px solid #f1c40f;">
-        <h1 style="margin: 0; color: #ffffff; font-size: 2.2em;">Balance y Operación del Negocio</h1>
-        <p style="color: #8fa0b5; margin: 5px 0 0 0;">Monitoreo de ingresos de caja, pasivos contingentes y flujos de apuestas activas.</p>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+    .admin-hero {
+        background: var(--surface-1);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 26px 30px;
+        margin-bottom: 24px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .admin-hero::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    .admin-hero::after {
+        content: 'ADMIN';
+        position: absolute;
+        right: 24px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 6rem;
+        letter-spacing: 0.1em;
+        color: rgba(212,175,55,0.04);
+        pointer-events: none;
+        user-select: none;
+    }
+
+    .hero-eyebrow {
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 6px;
+    }
+
+    .hero-title {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 2rem;
+        letter-spacing: 0.05em;
+        color: var(--text);
+        margin: 0 0 6px;
+        line-height: 1;
+    }
+
+    .hero-sub {
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin: 0;
+    }
+
+    .admin-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--gold);
+        background: var(--gold-dim);
+        border: 1px solid var(--gold-border);
+        padding: 7px 14px;
+        border-radius: 100px;
+        white-space: nowrap;
+    }
+
+    .admin-badge-dot {
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        background: var(--gold);
+        animation: pulse-gold 1.8s infinite;
+    }
+
+    @keyframes pulse-gold {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+    }
+
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .kpi-card {
+        background: var(--surface-1);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 22px 24px;
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .kpi-card:hover { border-color: var(--border-md); transform: translateY(-2px); }
+
+    .kpi-card.green { border-left: 2px solid var(--green-neon); }
+    .kpi-card.gold  { border-left: 2px solid var(--gold); }
+
+    .kpi-label {
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+    }
+
+    .kpi-card.green .kpi-label { color: var(--green-neon); }
+    .kpi-card.gold  .kpi-label { color: var(--gold); }
+
+    .kpi-value {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 2.4rem;
+        letter-spacing: 0.04em;
+        line-height: 1;
+        color: var(--text);
+        margin-bottom: 8px;
+    }
+
+    .kpi-card.green .kpi-value { color: var(--green-neon); }
+    .kpi-card.gold  .kpi-value { color: var(--gold); }
+
+    .kpi-desc {
+        font-size: 0.78rem;
+        color: var(--dim);
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    .actions-bar {
+        background: var(--surface-1);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 18px 22px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+
+    .actions-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+        flex-shrink: 0;
+    }
+
+    .actions-divider {
+        width: 1px;
+        height: 20px;
+        background: var(--border-md);
+        flex-shrink: 0;
+    }
+
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border-radius: var(--radius-sm);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-decoration: none;
+        letter-spacing: 0.02em;
+        transition: all 0.15s;
+        white-space: nowrap;
+    }
+
+    .btn-create {
+        background: rgba(0,230,118,0.1);
+        color: var(--green-neon);
+        border: 1px solid rgba(0,230,118,0.25);
+    }
+    .btn-create:hover {
+        background: rgba(0,230,118,0.18);
+        border-color: rgba(0,230,118,0.45);
+    }
+
+    .btn-audit {
+        background: var(--gold-dim);
+        color: var(--gold);
+        border: 1px solid var(--gold-border);
+    }
+    .btn-audit:hover {
+        background: rgba(212,175,55,0.18);
+        border-color: rgba(212,175,55,0.45);
+    }
+
+    .table-panel {
+        background: var(--surface-1);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+    }
+
+    .table-panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border);
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .table-panel-title {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 1.2rem;
+        letter-spacing: 0.07em;
+        color: var(--text);
+        margin: 0;
+    }
+
+    .table-panel-sub {
+        font-size: 0.75rem;
+        color: var(--dim);
+    }
+
+    .table-wrap { overflow-x: auto; }
+
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 680px;
+    }
+
+    .admin-table th {
+        padding: 11px 14px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--dim);
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .admin-table th.right { text-align: right; }
+    .admin-table th.center { text-align: center; }
+
+    .admin-table td {
+        padding: 13px 14px;
+        font-size: 0.88rem;
+        color: var(--muted);
+        border-bottom: 1px solid rgba(255,255,255,0.03);
+        vertical-align: middle;
+    }
+
+    .admin-table td.right { text-align: right; }
+    .admin-table td.center { text-align: center; }
+
+    .admin-table tbody tr {
+        transition: background 0.12s;
+    }
+
+    .admin-table tbody tr:hover {
+        background: rgba(255,255,255,0.02);
+    }
+
+    .admin-table tbody tr:last-child td { border-bottom: none; }
+
+    .ticket-id {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 1rem;
+        letter-spacing: 0.06em;
+        color: var(--gold);
+    }
+
+    .client-name {
+        font-weight: 600;
+        color: var(--text);
+        font-size: 0.9rem;
+    }
+
+    .client-email {
+        font-size: 0.75rem;
+        color: var(--dim);
+        margin-top: 2px;
+    }
+
+    .match-text {
+        font-weight: 600;
+        color: var(--text);
+    }
+
+    .amount-apostado {
+        font-weight: 700;
+        color: #FF6B6B;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .amount-retorno {
+        font-weight: 700;
+        color: var(--green-neon);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .chip {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 100px;
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .chip-pending {
+        background: rgba(255,193,7,0.1);
+        color: #FFCA28;
+        border: 1px solid rgba(255,193,7,0.22);
+    }
+
+    .chip-won {
+        background: rgba(0,230,118,0.1);
+        color: var(--green-neon);
+        border: 1px solid rgba(0,230,118,0.2);
+    }
+
+    .chip-lost {
+        background: rgba(255,76,76,0.1);
+        color: #FF6B6B;
+        border: 1px solid rgba(255,76,76,0.2);
+    }
+
+    .empty-row td {
+        text-align: center;
+        padding: 48px 20px !important;
+        color: var(--dim) !important;
+        font-size: 0.88rem;
+    }
+
+    @media (max-width: 700px) {
+        .actions-bar { flex-direction: column; align-items: flex-start; }
+        .actions-divider { display: none; }
+        .admin-hero::after { display: none; }
+    }
+</style>
+
+<div class="admin-hero">
+    <div>
+        <div class="hero-eyebrow">Panel de Control</div>
+        <h1 class="hero-title">Balance y Operación del Negocio</h1>
+        <p class="hero-sub">Monitoreo de ingresos, pasivos contingentes y flujos de apuestas activas.</p>
     </div>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
-        
-        <div style="background: #111923; padding: 25px; border-radius: 10px; border: 1px solid #27ae60;">
-            <small style="color: #27ae60; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Ingresos Brutos de Caja</small>
-            <h2 style="font-size: 2.5em; margin: 10px 0; color: #ffffff;">S/ {{ total_ingresos|floatformat:2 }}</h2>
-            <p style="color: #56657a; font-size: 0.9em; margin: 0;">Volumen total depositado por los clientes en la plataforma.</p>
-        </div>
-
-        <div style="background: #111923; padding: 25px; border-radius: 10px; border: 1px solid #f1c40f;">
-            <small style="color: #f1c40f; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Obligaciones por Liquidar</small>
-            <h2 style="font-size: 2.5em; margin: 10px 0; color: #ffffff;">S/ {{ total_por_liquidar|floatformat:2 }}</h2>
-            <p style="color: #56657a; font-size: 0.9em; margin: 0;">Premios potenciales en juego que podrían demandar desembolso.</p>
-        </div>
+    <div class="admin-badge">
+        <span class="admin-badge-dot"></span>
+        Acceso Staff
     </div>
-
-    <div style="background: #111923; padding: 20px; border-radius: 10px; display: flex; gap: 15px; align-items: center; margin-bottom: 35px;">
-        <span style="color: #ffffff; font-weight: bold;">Acciones de Gestión:</span>
-        <a href="{% url 'deportes:crear_partido' %}" class="button button--primary" style="background: #27ae60; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;">+ Crear Nuevo Partido</a>
-        <a href="{% url 'apuestas:lista_pendientes' %}" class="button button--primary" style="background: #3498db; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;">Auditar e Iniciar Liquidación</a>
-    </div>
-
-    <div style="background: #111923; padding: 25px; border-radius: 10px;">
-        <h3 style="color: #ffffff; margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid #1f2d3d; padding-bottom: 10px;">Bitácora Reciente de Apuestas de Clientes</h3>
-        
-        <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; text-align: left; color: #b1c2d4;">
-                <thead>
-                    <tr style="border-bottom: 2px solid #1f2d3d; color: #ffffff;">
-                        <th style="padding: 12px;">ID</th>
-                        <th style="padding: 12px;">Cliente / Usuario</th>
-                        <th style="padding: 12px;">Evento Deportivo</th>
-                        <th style="padding: 12px; text-align: right;">Monto Apostado</th>
-                        <th style="padding: 12px; text-align: right;">Retorno Potencial</th>
-                        <th style="padding: 12px; text-align: center;">Estado Actual</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for apuesta in historial_apuestas %}
-                        <tr style="border-bottom: 1px solid #1f2d3d;">
-                            <td style="padding: 12px; font-weight: bold; color: #f1c40f;">#{{ apuesta.id }}</td>
-                            <td style="padding: 12px;">{{ apuesta.usuario.username }} <br><small style="color: #56657a;">{{ apuesta.usuario.email }}</small></td>
-                            <td style="padding: 12px;">{{ apuesta.evento.equipo_local }} vs {{ apuesta.evento.equipo_visitante }}</td>
-                            <td style="padding: 12px; text-align: right; color: #e74c3c;">S/ {{ apuesta.monto|floatformat:2 }}</td>
-                            <td style="padding: 12px; text-align: right; color: #27ae60; font-weight: bold;">S/ {{ apuesta.ganancia_potencial|floatformat:2 }}</td>
-                            <td style="padding: 12px; text-align: center;">
-                                <span style="padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;
-                                    {% if apuesta.estado == 'PENDIENTE' %} background: #f1c40f; color: #1a2533;
-                                    {% elif apuesta.estado == 'GANADA' %} background: #27ae60; color: #ffffff;
-                                    {% else %} background: #e74c3c; color: #ffffff; {% endif %}">
-                                    {{ apuesta.estado }}
-                                </span>
-                            </td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="6" style="padding: 30px; text-align: center; color: #56657a;">No se registran transacciones operativas de apuestas en el sistema.</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
 </div>
+
+<div class="kpi-grid">
+    <div class="kpi-card green">
+        <div class="kpi-label">Ingresos Brutos de Caja</div>
+        <div class="kpi-value">S/ {{ total_ingresos|floatformat:2 }}</div>
+        <p class="kpi-desc">Volumen total depositado por los clientes en la plataforma.</p>
+    </div>
+    <div class="kpi-card gold">
+        <div class="kpi-label">Obligaciones por Liquidar</div>
+        <div class="kpi-value">S/ {{ total_por_liquidar|floatformat:2 }}</div>
+        <p class="kpi-desc">Premios potenciales en juego que podrían demandar desembolso.</p>
+    </div>
+</div>
+
+<div class="actions-bar">
+    <span class="actions-label">Acciones de Gestión</span>
+    <div class="actions-divider"></div>
+    <a href="{% url 'deportes:crear_partido' %}" class="btn-action btn-create">
+        ＋ Crear Nuevo Partido
+    </a>
+    <a href="{% url 'apuestas:lista_pendientes' %}" class="btn-action btn-audit">
+        ⚖ Auditar e Iniciar Liquidación
+    </a>
+</div>
+
+<div class="table-panel">
+    <div class="table-panel-header">
+        <h3 class="table-panel-title">📋 Bitácora de Apuestas</h3>
+        <span class="table-panel-sub">Registro operativo reciente de clientes</span>
+    </div>
+
+    <div class="table-wrap">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente / Usuario</th>
+                    <th>Evento Deportivo</th>
+                    <th class="right">Monto Apostado</th>
+                    <th class="right">Retorno Potencial</th>
+                    <th class="center">Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for apuesta in historial_apuestas %}
+                <tr>
+                    <td><span class="ticket-id">#{{ apuesta.id }}</span></td>
+                    <td>
+                        <div class="client-name">{{ apuesta.usuario.username }}</div>
+                        <div class="client-email">{{ apuesta.usuario.email }}</div>
+                    </td>
+                    <td><span class="match-text">{{ apuesta.evento.equipo_local }} vs {{ apuesta.evento.equipo_visitante }}</span></td>
+                    <td class="right"><span class="amount-apostado">S/ {{ apuesta.monto|floatformat:2 }}</span></td>
+                    <td class="right"><span class="amount-retorno">S/ {{ apuesta.ganancia_potencial|floatformat:2 }}</span></td>
+                    <td class="center">
+                        {% if apuesta.estado == 'PENDIENTE' %}
+                            <span class="chip chip-pending">Pendiente</span>
+                        {% elif apuesta.estado == 'GANADA' %}
+                            <span class="chip chip-won">Ganada</span>
+                        {% else %}
+                            <span class="chip chip-lost">{{ apuesta.estado }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="empty-row">
+                    <td colspan="6">No se registran transacciones operativas en el sistema.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
 {% endblock %}

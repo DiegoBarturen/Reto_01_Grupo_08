@@ -4,7 +4,6 @@ from django.db.models import Sum
 from decimal import Decimal
 import uuid
 
-# 1. PERFIL DE USUARIO (Módulo KYC y Juego Responsable)
 class Perfil(models.Model):
     class Estado(models.TextChoices):
         PENDIENTE = 'PENDIENTE', 'Pendiente de Verificación'
@@ -17,14 +16,12 @@ class Perfil(models.Model):
     fecha_nacimiento = models.DateField(null=True, blank=True)
     estado = models.CharField(max_length=20, choices=Estado.choices, default=Estado.PENDIENTE)
 
-    # Controles de Juego Responsable
     limite_deposito_diario = models.DecimalField(max_digits=18, decimal_places=4, default=Decimal('1000.0000'))
     autoexcluido_hasta = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Perfil de {self.usuario.username} - {self.estado}"
 
-# 2. LA BILLETERA (Ahora funciona como una Cuenta Contable, no guarda el saldo)
 class Billetera(models.Model):
     class TipoCuenta(models.TextChoices):
         USUARIO = 'USUARIO', 'Billetera de Usuario'
@@ -51,14 +48,13 @@ class Billetera(models.Model):
             return f"Billetera de {self.usuario.username}"
         return f"Cuenta del Sistema: {self.tipo}"
 
-# 3. ENTRADA DE LIBRO MAYOR (Ledger Entry - Partida Doble)
 class LedgerEntry(models.Model):
     class Direccion(models.TextChoices):
         DEBIT = 'DEBIT', 'Débito (-)'
         CREDIT = 'CREDIT', 'Crédito (+)'
 
     billetera = models.ForeignKey(Billetera, on_delete=models.PROTECT, related_name='movimientos')
-    transaction_id = models.UUIDField(default=uuid.uuid4, editable=False) # Agrupa las 2 partidas
+    transaction_id = models.UUIDField(default=uuid.uuid4, editable=False) 
     direccion = models.CharField(max_length=10, choices=Direccion.choices)
     monto = models.DecimalField(max_digits=18, decimal_places=4)
     descripcion = models.CharField(max_length=255)

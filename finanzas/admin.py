@@ -11,7 +11,6 @@ class BilleteraAdmin(admin.ModelAdmin):
     list_display = ('usuario', 'tipo', 'saldo_actual', 'creado_en')
 
     def saldo_actual(self, obj):
-        # Llama a la propiedad dinámica que creamos
         return obj.saldo 
     saldo_actual.short_description = 'Saldo (Calculado)'
 

@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from decimal import Decimal # Importante para manejar dinero con precisión
+from decimal import Decimal
 
 class Evento(models.Model):
     OPCIONES_DEPORTE = [
@@ -43,7 +43,6 @@ class Cuota(models.Model):
     def __str__(self):
         return f"Cuotas para: {self.evento}"
 
-    # --- MÉTODO DE SEGURIDAD: PRICE LOCKING ---
     def obtener_cuota_actual(self, seleccion):
         """
         Retorna la cuota real desde la BD según la selección del usuario.

@@ -1,13 +1,11 @@
 from datetime import date, timedelta
 from decimal import Decimal
 import uuid
-
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.db.models import Q, Sum
 from django.utils import timezone
 from rest_framework import serializers
-
 from .models import Billetera, LedgerEntry, Perfil
 
 
@@ -17,7 +15,6 @@ USER_WITHDRAWAL_DESCRIPTION = "Retiro de saldo"
 
 
 def _calculate_age(fecha_nacimiento):
-    """Calcula la edad exacta sin aproximaciones por años bisiestos."""
     hoy = date.today()
     return hoy.year - fecha_nacimiento.year - (
         (hoy.month, hoy.day) < (fecha_nacimiento.month, fecha_nacimiento.day)
@@ -25,12 +22,10 @@ def _calculate_age(fecha_nacimiento):
 
 
 def _quantize_financial(value):
-    """Fuerza salida 18.4 para mantener consistencia contable."""
     return (value or Decimal("0")).quantize(LEDGER_PRECISION)
 
 
 def _wallet_balance_for_queryset(billetera):
-    """Saldo real = creditos - debitos, calculado solo desde el ledger."""
     totals = billetera.movimientos.aggregate(
         creditos=Sum("monto", filter=Q(direccion=LedgerEntry.Direccion.CREDIT)),
         debitos=Sum("monto", filter=Q(direccion=LedgerEntry.Direccion.DEBIT)),
@@ -108,7 +103,6 @@ class UsuarioRegisterSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
 
-        # El estado inicial queda pendiente hasta revisión KYC posterior.
         Perfil.objects.create(
             usuario=user,
             dni=dni,
@@ -250,7 +244,6 @@ class TransactionSimulatedSerializer(serializers.Serializer):
             self.fail("insufficient_funds")
 
     def _configured_recharge_limits(self, perfil):
-        """Solo valida límites que existan realmente en el modelo."""
         limits = {}
         if getattr(perfil, "limite_deposito_diario", None) is not None:
             limits["DIARIO"] = perfil.limite_deposito_diario
@@ -261,11 +254,7 @@ class TransactionSimulatedSerializer(serializers.Serializer):
         return limits
 
     def _sum_user_recharges(self, user, periodo):
-        """
-        Solo suma recargas reales del usuario.
-        Excluye premios, devoluciones y otros creditos porque filtramos por
-        descripcion contable estandarizada del flujo de recarga.
-        """
+
         now = timezone.now()
         queryset = LedgerEntry.objects.filter(
             billetera__usuario=user,
@@ -320,7 +309,6 @@ class TransactionSimulatedSerializer(serializers.Serializer):
                 descripcion=descripcion_casa,
             )
         else:
-            # Revalidamos saldo dentro de la transaccion para cerrar carrera de concurrencia.
             saldo_actual = _wallet_balance_for_queryset(billetera_usuario)
             if saldo_actual < monto:
                 self.fail("insufficient_funds")

@@ -1,6 +1,5 @@
 from decimal import Decimal
 import uuid
-
 from django.db import transaction
 from django.db.models import Q, Sum
 from rest_framework import status
@@ -8,7 +7,6 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
 from deportes.models import Cuota, Evento
 from finanzas.models import Billetera, LedgerEntry, Perfil
 

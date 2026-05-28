@@ -1,12 +1,10 @@
 from datetime import date
 import re
 from decimal import Decimal
-
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, UserCreationForm
 from django.contrib.auth.models import User
 
-# Definimos los métodos de pago aquí
 METODO_CHOICES = [
     ('TARJETA', 'Tarjeta de Crédito/Débito'),
     ('TRANSFERENCIA', 'Transferencia Bancaria'),
@@ -17,7 +15,6 @@ class RegistroUsuarioForm(UserCreationForm):
     first_name = forms.CharField(max_length=150, required=True, label="Nombre")
     last_name = forms.CharField(max_length=150, required=False, label="Apellido")
     
-    # Campo UNIFICADO de 9 dígitos (8 dígitos DNI + 1 verificador)
     dni = forms.CharField(
         max_length=9, 
         min_length=9, 
@@ -46,7 +43,6 @@ class RegistroUsuarioForm(UserCreationForm):
         self.fields["password1"].label = "Contraseña"
         self.fields["password2"].label = "Confirmar contraseña"
 
-    # --- VALIDACIÓN MAYORÍA DE EDAD ---
     def clean_fecha_nacimiento(self):
         fecha_nac = self.cleaned_data.get('fecha_nacimiento')
         if fecha_nac:
@@ -56,15 +52,12 @@ class RegistroUsuarioForm(UserCreationForm):
                 raise forms.ValidationError("Acceso denegado: Debes ser mayor de 18 años para operar.")
         return fecha_nac
 
-    # --- VALIDACIÓN MÓDULO 11 PARA DNI ---
     def clean_dni(self):
         dni_input = self.cleaned_data.get('dni')
         
-        # 1. Validamos formato básico (que sean 9 números)
         if not dni_input.isdigit() or len(dni_input) != 9:
             raise forms.ValidationError("El DNI debe contener exactamente 9 números.")
             
-        # 2. Mantenemos el cálculo en segundo plano (para tu informe o debug)
         parte_dni = dni_input[:8]
         digito_ingresado = int(dni_input[8])
         
@@ -72,14 +65,11 @@ class RegistroUsuarioForm(UserCreationForm):
         suma = sum(int(parte_dni[i]) * multiplicadores[i] for i in range(8))
         resto = suma % 11
         
-        # Tabla de equivalencias RENIEC
         equivalencias = [6, 7, 8, 9, 0, 1, 1, 2, 3, 4, 5]
         esperado = equivalencias[resto]
         
-        # 3. YA NO BLOQUEAMOS EL REGISTRO
         if digito_ingresado != esperado:
             print(f"DEBUG: El sistema esperaba '{esperado}' para el DNI '{parte_dni}', pero ingresaste '{digito_ingresado}'. Registro permitido.")
-            # Eliminamos el raise forms.ValidationError para que el usuario pueda entrar
             
         return dni_input
 

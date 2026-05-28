@@ -6,7 +6,6 @@
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap');
 
-    /* ── LAYOUT PRINCIPAL ── */
     .layout-principal {
         display: flex;
         gap: 20px;
@@ -14,7 +13,6 @@
         margin-top: 10px;
     }
 
-    /* ── SIDEBAR IZQUIERDO ── */
     .sidebar {
         width: 220px;
         background: var(--surface-1);
@@ -75,13 +73,11 @@
         font-weight: 700;
     }
 
-    /* ── CONTENIDO CENTRAL ── */
     .contenido-eventos {
         flex: 1;
         min-width: 0;
     }
 
-    /* ── TOP BAR ── */
     .top-bar {
         display: flex;
         justify-content: space-between;
@@ -101,7 +97,6 @@
         margin: 0;
     }
 
-    /* ── SIMULADOR ── */
     .simulador {
         display: flex;
         align-items: center;
@@ -140,7 +135,6 @@
         box-shadow: 0 0 0 3px var(--gold-dim);
     }
 
-    /* ── BANNER JUEGO RESPONSABLE ── */
     .banner-juego-responsable {
         background: rgba(212,175,55,0.04);
         border: 1px solid var(--gold-border);
@@ -173,14 +167,12 @@
 
     .banner-jr-text strong { color: var(--text); }
 
-    /* ── GRID DE EVENTOS ── */
     .grid-tarjetas {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
         gap: 16px;
     }
 
-    /* ── TARJETA DE EVENTO ── */
     .evento-card {
         background: var(--surface-1);
         border: 1px solid var(--border);
@@ -208,7 +200,6 @@
 
     .evento-card:hover::before { opacity: 1; }
 
-    /* ── CARD HEADER ── */
     .card-header {
         display: flex;
         justify-content: space-between;
@@ -268,7 +259,6 @@
         50% { opacity: 0.3; }
     }
 
-    /* ── EQUIPOS ── */
     .equipos-container {
         margin-bottom: 18px;
     }
@@ -304,7 +294,6 @@
         padding: 2px 0 2px 16px;
     }
 
-    /* ── BOTONES CUOTAS ── */
     .cuotas-row {
         display: flex;
         gap: 8px;
@@ -364,7 +353,6 @@
         pointer-events: none;
     }
 
-    /* ── ESTADO CUOTAS PENDIENTES ── */
     .cuotas-pendientes {
         width: 100%;
         text-align: center;
@@ -376,7 +364,6 @@
         border: 1px dashed var(--border-md);
     }
 
-    /* ── DISABLED ── */
     .btn-cuota.btn-disabled {
         opacity: 0.35;
         cursor: not-allowed;
@@ -408,7 +395,6 @@
 
     .btn-disabled:hover::after { visibility: visible; opacity: 1; }
 
-    /* ── SIN EVENTOS ── */
     .sin-eventos {
         grid-column: 1 / -1;
         text-align: center;
@@ -422,7 +408,6 @@
     .sin-eventos h3 { color: var(--text); font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.06em; font-size: 1.4rem; margin: 0 0 8px; }
     .sin-eventos p { color: var(--muted); font-size: 0.88rem; margin: 0; }
 
-    /* ── BETSLIP ── */
     .betslip-panel {
         width: 290px;
         background: var(--surface-1);
@@ -604,7 +589,6 @@
         transform: none;
     }
 
-    /* ── RESPONSIVE ── */
     @media (max-width: 1000px) {
         .betslip-panel { display: none !important; }
     }
@@ -618,7 +602,6 @@
 
 <div class="layout-principal">
 
-    <!-- 1. SIDEBAR IZQUIERDO -->
     <aside class="sidebar">
         <h3 class="sidebar-title">Deportes</h3>
         <ul class="menu-deportes">
@@ -631,7 +614,6 @@
         </ul>
     </aside>
 
-    <!-- 2. CONTENIDO CENTRAL -->
     <main class="contenido-eventos">
 
         <div class="banner-juego-responsable">
@@ -762,7 +744,6 @@
         </div>
     </main>
 
-    <!-- 3. BETSLIP DERECHO -->
     <aside class="betslip-panel" id="betslip-panel">
 
         <div class="betslip-top">

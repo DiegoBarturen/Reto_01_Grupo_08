@@ -56,7 +56,6 @@ class Apuesta(models.Model):
         ordering = ['-fecha_creacion']
 
     def save(self, *args, **kwargs):
-        # Calcula automáticamente cuánto ganaría antes de guardar en la BD
         self.ganancia_potencial = self.monto_apostado * self.cuota_fijada
         super().save(*args, **kwargs)
 

@@ -3,13 +3,492 @@
 {% block title %}Ingresar | FairBet Lab{% endblock %}
 
 {% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+    .auth-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 60px;
+        align-items: start;
+    }
+
+    .auth-showcase {
+        background: var(--surface-1);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 36px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-showcase::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    .auth-showcase::after {
+        content: 'FB';
+        position: absolute;
+        right: -10px;
+        bottom: -20px;
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 11rem;
+        letter-spacing: -0.02em;
+        color: rgba(212,175,55,0.04);
+        pointer-events: none;
+        user-select: none;
+        line-height: 1;
+    }
+
+    .showcase-eyebrow {
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 10px;
+    }
+
+    .showcase-title {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 2.5rem;
+        letter-spacing: 0.04em;
+        line-height: 1.1;
+        color: var(--text);
+        margin: 0 0 14px;
+    }
+
+    .showcase-title span { color: var(--gold); }
+
+    .showcase-lead {
+        font-size: 0.92rem;
+        color: var(--muted);
+        line-height: 1.7;
+        margin: 0 0 32px;
+        max-width: 380px;
+    }
+
+    .showcase-grid {
+        display: grid;
+        gap: 12px;
+    }
+
+    .showcase-tile {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 16px 18px;
+        display: grid;
+        gap: 3px;
+        transition: border-color 0.15s;
+    }
+
+    .showcase-tile:hover { border-color: var(--gold-border); }
+
+    .showcase-tile__label {
+        font-size: 0.63rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--gold);
+    }
+
+    .showcase-tile strong {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .showcase-tile p {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    .auth-panel {
+        background: var(--surface-1);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 36px;
+        position: sticky;
+        top: 80px;
+    }
+
+    .auth-panel__header {
+        margin-bottom: 28px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .auth-eyebrow {
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 8px;
+    }
+
+    .auth-title {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 2rem;
+        letter-spacing: 0.05em;
+        color: var(--text);
+        margin: 0 0 8px;
+    }
+
+    .auth-desc {
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .form-grid { display: grid; gap: 16px; }
+
+    .field { display: grid; gap: 6px; }
+
+    .field label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+    }
+
+    .field input,
+    .field select {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-md);
+        background: var(--surface-0);
+        color: var(--text);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: border-color 0.15s, box-shadow 0.15s;
+        box-sizing: border-box;
+    }
+
+    .field input:focus,
+    .field select:focus {
+        outline: none;
+        border-color: var(--gold-border);
+        box-shadow: 0 0 0 3px var(--gold-dim);
+    }
+
+    .errorlist {
+        list-style: none;
+        padding: 0; margin: 0;
+    }
+
+    .errorlist li {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--danger);
+        background: rgba(255,76,76,0.07);
+        border: 1px solid rgba(255,76,76,0.2);
+        padding: 6px 10px;
+        border-radius: var(--radius-sm);
+        margin-top: 4px;
+    }
+
+    .btn-login {
+        display: block;
+        width: 100%;
+        padding: 13px;
+        background: var(--gold);
+        color: #0A0B0E;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+        margin-top: 4px;
+    }
+
+    .btn-login:hover {
+        background: var(--gold-light);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(212,175,55,0.3);
+    }
+
+    .auth-panel__meta {
+        margin-top: 20px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
+        font-size: 0.83rem;
+        color: var(--muted);
+        text-align: center;
+    }
+
+    .auth-panel__meta a {
+        color: var(--gold);
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .auth-panel__meta a:hover { color: var(--gold-light); }
+
+    .landing-hero-cartelera {
+        padding: 64px 0 20px;
+        border-top: 1px solid var(--border);
+        position: relative;
+    }
+
+    .lhc-header {
+        text-align: center;
+        margin-bottom: 48px;
+    }
+
+    .lhc-eyebrow {
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 10px;
+    }
+
+    .lhc-title {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 3.2rem;
+        color: var(--text);
+        margin: 0 0 10px;
+        letter-spacing: 0.06em;
+        line-height: 1;
+    }
+
+    .lhc-title span { color: var(--gold); }
+
+    .lhc-subtitle {
+        color: var(--muted);
+        font-size: 0.95rem;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    .lhc-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 16px;
+    }
+
+    .lhc-card {
+        background: var(--surface-1);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 22px;
+        transition: transform 0.25s cubic-bezier(0.175,0.885,0.32,1.275), border-color 0.2s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .lhc-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--gold-border), transparent);
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .lhc-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--gold-border);
+    }
+
+    .lhc-card:hover::before { opacity: 1; }
+
+    .lhc-card.is-live {
+        border-color: rgba(255,59,59,0.25);
+    }
+
+    .lhc-card.is-live::before {
+        opacity: 1;
+        background: linear-gradient(90deg, transparent, rgba(255,59,59,0.4), transparent);
+    }
+
+    .lhc-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .lhc-sport-badge {
+        font-size: 0.65rem;
+        font-weight: 800;
+        color: #0A0B0E;
+        background: var(--gold);
+        padding: 3px 10px;
+        border-radius: 100px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .lhc-card.is-live .lhc-sport-badge {
+        background: var(--red-live);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .live-dot {
+        width: 5px; height: 5px;
+        border-radius: 50%;
+        background: #fff;
+        animation: pulse-live 1.2s infinite;
+    }
+
+    @keyframes pulse-live {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+    }
+
+    .lhc-date {
+        font-size: 0.75rem;
+        color: var(--dim);
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .lhc-teams {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-bottom: 22px;
+    }
+
+    .lhc-team {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .team-dot {
+        width: 7px; height: 7px;
+        border-radius: 50%;
+        background: var(--dim);
+        flex-shrink: 0;
+    }
+
+    .lhc-team:first-child .team-dot { background: var(--gold); }
+
+    .lhc-vs {
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        color: var(--dim);
+        padding: 2px 0 2px 17px;
+    }
+
+    .lhc-odds { display: flex; gap: 8px; }
+
+    .lhc-odd-btn {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 6px;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        text-decoration: none;
+        transition: all 0.18s ease;
+        cursor: pointer;
+        gap: 4px;
+    }
+
+    .lhc-odd-btn:hover {
+        background: var(--gold);
+        border-color: var(--gold);
+        transform: scale(1.04);
+    }
+
+    .lhc-odd-btn span.label {
+        font-size: 0.62rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        font-weight: 800;
+        letter-spacing: 0.07em;
+        transition: color 0.18s;
+    }
+
+    .lhc-odd-btn span.val {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 1.45rem;
+        color: var(--green-neon);
+        line-height: 1;
+        letter-spacing: 0.04em;
+        transition: color 0.18s;
+    }
+
+    .lhc-odd-btn:hover span.label,
+    .lhc-odd-btn:hover span.val { color: #0A0B0E; }
+
+    @keyframes live-odd-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; text-shadow: 0 0 8px var(--green-neon); }
+    }
+
+    .lhc-card.is-live .lhc-odd-btn span.val {
+        animation: live-odd-pulse 2.5s infinite alternate;
+    }
+
+    .cuotas-soon {
+        width: 100%;
+        text-align: center;
+        font-size: 0.8rem;
+        color: var(--dim);
+        padding: 14px;
+        background: var(--surface-2);
+        border-radius: var(--radius-sm);
+        border: 1px dashed var(--border-md);
+    }
+
+    .lhc-empty {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 48px 20px;
+        color: var(--dim);
+        font-size: 0.95rem;
+    }
+
+    @media (max-width: 860px) {
+        .auth-layout { grid-template-columns: 1fr; }
+        .auth-showcase { display: none; }
+        .auth-panel { position: relative; top: 0; }
+        .lhc-title { font-size: 2.2rem; }
+    }
+</style>
+
 <section class="auth-layout">
-    <article class="auth-showcase card card--glow">
-        <div class="eyebrow">Experiencia Deportiva</div>
-        <h1>Un acceso con estilo de jornada grande</h1>
-        <p class="lead">
-            Entra a una billetera virtual con una interfaz inspirada en plataformas deportivas modernas:
-            clara, rápida y lista para seguir creciendo.
+
+    <article class="auth-showcase">
+        <div class="showcase-eyebrow">Experiencia Deportiva</div>
+        <h1 class="showcase-title">Bienvenido a <span>FairBet</span> Lab</h1>
+        <p class="showcase-lead">
+            Entra a una billetera virtual con una interfaz inspirada en plataformas deportivas modernas: clara, rápida y lista para seguir creciendo.
         </p>
 
         <div class="showcase-grid">
@@ -26,16 +505,16 @@
             <div class="showcase-tile">
                 <span class="showcase-tile__label">Escalabilidad</span>
                 <strong>Base lista para crecer</strong>
-                <p>Una UI modular para sumar apuestas, cuotas y panel operador luego.</p>
+                <p>UI modular para sumar apuestas, cuotas y panel operador.</p>
             </div>
         </div>
     </article>
 
-    <article class="auth-panel card">
+    <article class="auth-panel">
         <div class="auth-panel__header">
-            <div class="eyebrow">Ingreso</div>
-            <h2>Inicia sesión</h2>
-            <p>Usa tus credenciales para entrar a tu cuenta y revisar la billetera virtual.</p>
+            <div class="auth-eyebrow">Acceso a la plataforma</div>
+            <h2 class="auth-title">Inicia Sesión</h2>
+            <p class="auth-desc">Usa tus credenciales para entrar a tu cuenta y revisar la billetera virtual.</p>
         </div>
 
         <form method="post" class="form-grid">
@@ -47,220 +526,50 @@
                     {{ field.errors }}
                 </div>
             {% endfor %}
-            <button type="submit" class="button button--primary button--full">Ingresar a la plataforma</button>
+            <button type="submit" class="btn-login">Ingresar a la plataforma →</button>
         </form>
 
         <p class="auth-panel__meta">
-            Si aún no tienes cuenta, <a href="{% url 'finanzas:registro' %}">crea tu registro aquí</a>.
+            ¿Sin cuenta? <a href="{% url 'finanzas:registro' %}">Crea tu registro aquí</a>
         </p>
     </article>
+
 </section>
-
-<!-- ========================================== -->
-<!-- CARTELERA LANDING (HOOK DE CONVERSIÓN)     -->
-<!-- ========================================== -->
-<style>
-    .landing-hero-cartelera {
-        padding: 60px 20px;
-        margin-top: 40px;
-        background: radial-gradient(ellipse at top, #181c24 0%, var(--surface-0) 100%);
-        border-top: 1px solid rgba(212,175,55,0.15);
-        position: relative;
-    }
-    
-    .lhc-header {
-        text-align: center;
-        margin-bottom: 50px;
-    }
-    
-    .lhc-title {
-        font-family: 'Bebas Neue', sans-serif;
-        font-size: 3.5rem;
-        color: #fff;
-        margin: 0;
-        letter-spacing: 0.05em;
-        text-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    }
-    
-    .lhc-title span { color: var(--gold); }
-    
-    .lhc-subtitle {
-        color: var(--text-muted);
-        font-size: 1.1rem;
-        margin-top: 10px;
-        font-weight: 500;
-    }
-
-    .lhc-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 24px;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-
-    .lhc-card {
-        background: rgba(255,255,255,0.02);
-        border: 1px solid rgba(255,255,255,0.06);
-        border-radius: 16px;
-        padding: 26px;
-        backdrop-filter: blur(12px);
-        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s, border-color 0.3s;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .lhc-card::before {
-        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-        background: linear-gradient(90deg, transparent, var(--gold), transparent);
-        opacity: 0; transition: 0.3s;
-    }
-
-    .lhc-card:hover {
-        transform: translateY(-8px);
-        border-color: rgba(212,175,55,0.3);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.4), 0 0 20px rgba(212,175,55,0.1);
-    }
-
-    .lhc-card:hover::before { opacity: 1; }
-
-    .lhc-meta {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 24px;
-    }
-
-    .lhc-sport-badge {
-        font-size: 0.7rem;
-        font-weight: 800;
-        color: #000;
-        background: var(--gold);
-        padding: 4px 10px;
-        border-radius: 4px;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-    .lhc-date {
-        font-size: 0.8rem;
-        color: var(--text-dim);
-        font-weight: 600;
-    }
-
-    .lhc-teams {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        margin-bottom: 28px;
-    }
-
-    .lhc-team {
-        display: flex;
-        align-items: center;
-        font-size: 1.3rem;
-        font-weight: 700;
-        color: #fff;
-        gap: 12px;
-    }
-
-    .lhc-team::before {
-        content: ''; width: 8px; height: 8px;
-        border-radius: 50%; background: var(--text-muted);
-    }
-    
-    .lhc-team:first-child::before { background: var(--gold); }
-
-    .lhc-vs {
-        margin-left: 20px;
-        font-size: 0.75rem;
-        color: var(--text-dim);
-        font-weight: 800;
-        letter-spacing: 0.1em;
-    }
-
-    .lhc-odds { display: flex; gap: 10px; }
-
-    .lhc-odd-btn {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 14px 0;
-        background: rgba(0,0,0,0.3);
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 8px;
-        text-decoration: none;
-        transition: all 0.2s ease;
-        position: relative;
-    }
-
-    .lhc-odd-btn:hover {
-        background: var(--gold);
-        border-color: var(--gold);
-        transform: scale(1.05);
-    }
-
-    .lhc-odd-btn span.label {
-        font-size: 0.65rem;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        font-weight: 800;
-        margin-bottom: 6px;
-        letter-spacing: 0.05em;
-        transition: color 0.2s;
-    }
-
-    .lhc-odd-btn span.val {
-        font-family: 'Bebas Neue', sans-serif;
-        font-size: 1.6rem;
-        color: var(--green-neon);
-        line-height: 1;
-        transition: color 0.2s;
-    }
-
-    .lhc-odd-btn:hover span.label,
-    .lhc-odd-btn:hover span.val { color: #0A0B0E; }
-    
-    /* Efecto "En vivo" si el partido arrancó */
-    .is-live { border-color: rgba(255,59,59,0.3); }
-    .is-live .lhc-sport-badge { background: var(--red-live); color: #fff; }
-    
-    /* Animación de actualización de cuotas */
-    @keyframes live-odd-pulse {
-        0% { opacity: 1; }
-        50% { opacity: 0.5; text-shadow: 0 0 10px var(--green-neon); }
-        100% { opacity: 1; }
-    }
-    
-    .lhc-card.is-live .lhc-odd-btn span.val {
-        animation: live-odd-pulse 3s infinite alternate;
-    }
-</style>
 
 <section class="landing-hero-cartelera">
     <div class="lhc-header">
+        <div class="lhc-eyebrow">Cartelera en vivo</div>
         <h2 class="lhc-title">LA MEJOR <span>ACCIÓN</span> EN VIVO</h2>
-        <p class="lhc-subtitle">Selecciona tu pronóstico para iniciar sesión y empezar a ganar.</p>
+        <p class="lhc-subtitle">Selecciona tu pronóstico, inicia sesión y empieza a ganar.</p>
     </div>
-    
+
     <div class="lhc-grid">
         {% for evento in eventos_destacados %}
         <div class="lhc-card {% if evento.estado == 'EN_JUEGO' %}is-live{% endif %}">
+
             <div class="lhc-meta">
                 <span class="lhc-sport-badge">
-                    {% if evento.estado == 'EN_JUEGO' %}🔴 EN VIVO{% else %}{{ evento.get_deporte_display }}{% endif %}
+                    {% if evento.estado == 'EN_JUEGO' %}
+                        <span class="live-dot"></span> EN VIVO
+                    {% else %}
+                        {{ evento.get_deporte_display }}
+                    {% endif %}
                 </span>
-                <span class="lhc-date">{{ evento.fecha_hora|date:"d M - H:i" }}</span>
+                <span class="lhc-date">{{ evento.fecha_hora|date:"d M · H:i" }}</span>
             </div>
-            
+
             <div class="lhc-teams">
-                <div class="lhc-team">{{ evento.equipo_local }}</div>
+                <div class="lhc-team">
+                    <span class="team-dot"></span>
+                    {{ evento.equipo_local }}
+                </div>
                 <div class="lhc-vs">VS</div>
-                <div class="lhc-team">{{ evento.equipo_visitante }}</div>
+                <div class="lhc-team">
+                    <span class="team-dot"></span>
+                    {{ evento.equipo_visitante }}
+                </div>
             </div>
-            
+
             <div class="lhc-odds">
                 {% if evento.cuotas %}
                     <a href="{% url 'finanzas:login' %}" class="lhc-odd-btn" title="Inicia sesión para apostar al Local">
@@ -276,17 +585,15 @@
                         <span class="val">{{ evento.cuotas.paga_visitante }}</span>
                     </a>
                 {% else %}
-                    <div style="width: 100%; text-align: center; color: var(--text-dim); padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;">
-                        Cuotas preparándose...
-                    </div>
+                    <div class="cuotas-soon">Cuotas preparándose...</div>
                 {% endif %}
             </div>
+
         </div>
         {% empty %}
-            <p style="text-align: center; color: var(--text-muted); grid-column: 1/-1; font-size: 1.2rem;">
-                Las mejores cuotas se están cocinando. Vuelve en un momento.
-            </p>
+        <p class="lhc-empty">Las mejores cuotas se están cocinando. Vuelve en un momento.</p>
         {% endfor %}
     </div>
 </section>
+
 {% endblock %}

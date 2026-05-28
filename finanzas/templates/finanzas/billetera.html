@@ -35,7 +35,6 @@
         min-height: 100vh;
     }
 
-    /* ── HEADER ── */
     .db-header {
         display: flex;
         align-items: flex-end;
@@ -73,7 +72,6 @@
         font-weight: 600;
     }
 
-    /* ── LIVE TICKER ── */
     .live-badge {
         display: inline-flex;
         align-items: center;
@@ -99,7 +97,6 @@
         50% { opacity: 0.4; transform: scale(0.75); }
     }
 
-    /* ── ACTION BUTTONS ── */
     .action-buttons {
         display: flex;
         gap: 10px;
@@ -163,10 +160,8 @@
     .kpi-value.success { color: var(--green-neon); }
     .kpi-value.accent  { color: var(--gold); }
 
-    /* ── MAIN GRID ── */
     .dashboard-content { display: grid; grid-template-columns: 3fr 2fr; gap: 20px; }
 
-    /* ── PANELS ── */
     .card-panel {
         background: var(--surface-1); border: 1px solid var(--border);
         border-radius: var(--radius); padding: 24px; overflow: hidden;
@@ -185,7 +180,6 @@
     .panel-link:hover { background: rgba(212,175,55,0.2); color: var(--gold-light); }
     .panel-muted { font-size: 0.8rem; color: var(--text-dim); }
 
-    /* ── TABLE ── */
     .panel-table { width: 100%; border-collapse: collapse; }
     .panel-table th {
         text-align: left; padding: 10px 10px; color: var(--text-dim);
@@ -200,11 +194,9 @@
     .panel-table tbody tr:hover { background: rgba(255,255,255,0.02); }
     .panel-table tbody tr:last-child td { border-bottom: none; }
 
-    /* ── MATCH CELL ── */
     .match-name { color: var(--text-primary); font-weight: 600; font-size: 0.9rem; }
     .match-vs { color: var(--text-dim); font-size: 0.82rem; font-weight: 400; }
 
-    /* ── ESTADO CHIPS ── */
     .chip {
         display: inline-flex; align-items: center; justify-content: center;
         padding: 3px 9px; border-radius: 100px; font-size: 0.68rem;
@@ -214,7 +206,6 @@
     .chip-won { background: var(--green-dim); color: var(--green-neon); border: 1px solid rgba(0,230,118,0.2); }
     .chip-lost { background: rgba(255,59,59,0.1); color: #FF6B6B; border: 1px solid rgba(255,59,59,0.2); }
 
-    /* ── MONTO CON INDICADOR ── */
     .amount { font-weight: 700; color: var(--text-primary); }
     .tx-credit { color: var(--green-neon); font-weight: 800; }
     .tx-debit  { color: #FF6B6B; font-weight: 800; }
@@ -224,15 +215,12 @@
     .tx-dot.credit { background: var(--green-neon); }
     .tx-dot.debit  { background: #FF6B6B; }
 
-    /* ── EMPTY STATE ── */
     .empty-state { text-align: center; padding: 40px 20px; }
     .empty-icon { font-size: 2.5rem; opacity: 0.2; margin-bottom: 12px; }
     .empty-text { color: var(--text-dim); font-size: 0.9rem; margin: 0; }
 
-    /* ── DECORATIVE DIVIDER ── */
     .divider-gold { height: 1px; background: linear-gradient(90deg, transparent, var(--gold-dim), transparent); margin: 0 0 24px; }
 
-    /* ── MODAL HISTORIAL COMPLETO ── */
     .modal-overlay {
         position: fixed; top: 0; left: 0; right: 0; bottom: 0;
         background: rgba(10, 11, 14, 0.85); backdrop-filter: blur(5px);
@@ -257,7 +245,6 @@
     }
     .btn-close:hover { color: var(--red-live); }
 
-    /* ── RESPONSIVE ── */
     @media (max-width: 900px) {
         .dashboard-content { grid-template-columns: 1fr; }
         .action-buttons { flex-direction: column; }
@@ -315,7 +302,6 @@
 
     <div class="dashboard-content">
 
-        <!-- PANEL DE APUESTAS -->
         <div class="card-panel">
             <div class="panel-header">
                 <h3 class="panel-title">🎟 Últimas Jugadas</h3>
@@ -372,7 +358,6 @@
             {% endif %}
         </div>
 
-        <!-- PANEL DE BILLETERA FINANCIERA -->
         <div class="card-panel">
             <form method="POST" action="{% url 'finanzas:descargar_transacciones_pdf' %}">
                 {% csrf_token %}
@@ -444,7 +429,6 @@
     </div>
 </div>
 
-<!-- MODAL: HISTORIAL COMPLETO -->
 <div id="historialModal" class="modal-overlay" onclick="closeModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="panel-header" style="padding: 24px 24px 16px 24px; margin-bottom: 0;">

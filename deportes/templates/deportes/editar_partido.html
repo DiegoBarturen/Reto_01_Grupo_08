@@ -13,7 +13,6 @@
         
         <form method="POST" class="form-grid">
             {% csrf_token %}
-            <!-- Aquí copias exactamente los mismos campos de tu crear_partido.html -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div class="field" style="grid-column: 1 / -1;">
                     <label style="color: var(--muted);">Categoría / Deporte</label>
@@ -65,7 +64,6 @@
     </article>
 </section>
 
-<!-- Incluye aquí tu misma etiqueta <style> de crear_partido.html para que los inputs se vean oscuros -->
 <style>
     .field select, .field input[type="text"], .field input[type="number"], .field input[type="datetime-local"] {
         width: 100%; min-height: 52px; padding: 14px 16px; border-radius: 14px;

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FairBet Lab{% endblock %}</title>
+
+    <link rel="stylesheet" href="/static/finanzas/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-light: #F2D06B;
+            --gold-dim: rgba(212,175,55,0.1);
+            --gold-border: rgba(212,175,55,0.25);
+            --green-neon: #00E676;
+            --red-live: #FF3B3B;
+            --surface-0: #08090C;
+            --surface-1: #0F1117;
+            --surface-2: #161921;
+            --surface-3: #1C2030;
+            --border: rgba(255,255,255,0.06);
+            --border-md: rgba(255,255,255,0.1);
+            --text: #EFF1F8;
+            --muted: #6B738F;
+            --dim: #3A4060;
+            --accent: #FF7A1A;
+            --success: #00E676;
+            --danger: #FF4C4C;
+            --shadow: 0 4px 24px rgba(0,0,0,0.5);
+            --radius: 10px;
+            --radius-sm: 6px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: var(--surface-0);
+            color: var(--text);
+            font-family: 'DM Sans', system-ui, sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        /* ───────────────── NAVBAR ───────────────── */
+        .global-header {
+            background: var(--surface-1);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 62px;
+        }
+
+        /* Logo */
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            background: var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.1rem;
+            letter-spacing: 0.04em;
+            color: #08090C;
+            flex-shrink: 0;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.15;
+        }
+
+        .brand-name {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.3rem;
+            letter-spacing: 0.08em;
+            color: var(--text);
+        }
+
+        .brand-name span { color: var(--gold); }
+
+        .brand-sub {
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        /* Nav Links */
+        .navigation-section {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .user-greeting {
+            font-size: 0.82rem;
+            color: var(--muted);
+            padding: 0 8px;
+        }
+
+        .nav-divider {
+            width: 1px;
+            height: 18px;
+            background: var(--border-md);
+            margin: 0 4px;
+        }
+
+        .nav-link {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 7px 14px;
+            border-radius: var(--radius-sm);
+            transition: color 0.15s, background 0.15s;
+            letter-spacing: 0.02em;
+        }
+
+        .nav-link:hover {
+            color: var(--text);
+            background: var(--surface-3);
+        }
+
+        .nav-link-sport {
+            color: var(--green-neon);
+            border: 1px solid rgba(0,230,118,0.2);
+            background: rgba(0,230,118,0.05);
+        }
+        .nav-link-sport:hover {
+            background: rgba(0,230,118,0.12);
+            border-color: rgba(0,230,118,0.4);
+            color: var(--green-neon);
+        }
+
+        .nav-btn-admin {
+            color: var(--gold);
+            border: 1px solid var(--gold-border);
+            background: var(--gold-dim);
+        }
+        .nav-btn-admin:hover {
+            background: rgba(212,175,55,0.18);
+            color: var(--gold-light);
+        }
+
+        .nav-btn-exit {
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+        .nav-btn-exit:hover {
+            color: var(--danger);
+            border-color: rgba(255,76,76,0.3);
+            background: rgba(255,76,76,0.07);
+        }
+
+        /* ───────────────── MAIN ───────────────── */
+        .main-container {
+            flex: 1;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 28px 20px 40px;
+        }
+
+        /* ───────────────── ALERTS ───────────────── */
+        .messages-container {
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+
+        .alert-success, .alert-info {
+            background: rgba(0,230,118,0.08);
+            border: 1px solid rgba(0,230,118,0.25);
+            color: var(--success);
+        }
+
+        .alert-error, .alert-warning {
+            background: rgba(255,76,76,0.08);
+            border: 1px solid rgba(255,76,76,0.25);
+            color: var(--danger);
+        }
+
+        /* ───────────────── FOOTER ───────────────── */
+        .global-footer {
+            background: var(--surface-1);
+            border-top: 1px solid var(--border);
+            padding: 28px 20px;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            text-align: center;
+        }
+
+        .footer-brand {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.1rem;
+            letter-spacing: 0.1em;
+            color: var(--dim);
+        }
+        .footer-brand span { color: var(--gold); opacity: 0.6; }
+
+        .footer-restriction {
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--gold);
+            opacity: 0.7;
+        }
+
+        .footer-responsible-gaming {
+            font-size: 0.76rem;
+            color: var(--muted);
+            max-width: 700px;
+            line-height: 1.6;
+            padding: 10px 18px;
+            background: rgba(255,255,255,0.02);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+
+        .footer-responsible-gaming strong {
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .footer-copyright {
+            font-size: 0.7rem;
+            color: var(--dim);
+            letter-spacing: 0.04em;
+        }
+
+        /* ───────────────── RESPONSIVE ───────────────── */
+        @media (max-width: 768px) {
+            .user-greeting, .nav-divider { display: none; }
+            .header-container { height: 56px; }
+            .brand-sub { display: none; }
+            .nav-link { padding: 6px 10px; font-size: 0.8rem; }
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <header class="global-header">
+        <div class="header-container">
+
+            <a href="/" class="logo-section">
+                <div class="logo-icon">FB</div>
+                <div class="logo-text">
+                    <span class="brand-name">FAIR<span>BET</span> LAB</span>
+                    <span class="brand-sub">Billetera Deportiva Virtual</span>
+                </div>
+            </a>
+
+            <nav class="navigation-section">
+                {% if request.user.is_authenticated %}
+                    <span class="user-greeting">{{ request.user.username }}</span>
+                    <div class="nav-divider"></div>
+                    
+                    {% if request.user.is_staff %}
+                        <a href="{% url 'deportes:dashboard_admin' %}" class="nav-link">📊 Dashboard Admin</a>
+                        <a href="{% url 'deportes:gestionar_eventos' %}" class="nav-link">⚙️ Gestión Cartelera</a>
+                        <a href="{% url 'apuestas:lista_pendientes' %}" class="nav-link">⚖️ Liquidación</a>
+                        <a href="/admin/" class="nav-link nav-btn-admin" target="_blank" title="Acceso a Base de Datos Nativa">🐍 Django Admin</a>
+                    {% else %}
+                        <a href="{% url 'deportes:cartelera' %}" class="nav-link nav-link-sport">⚽ Cartelera</a>
+                        <a href="{% url 'finanzas:billetera' %}" class="nav-link">Dashboard</a>
+                    {% endif %}
+                    
+                    <a href="{% url 'finanzas:perfil' %}" class="nav-link">Perfil</a>
+                    <a href="{% url 'finanzas:logout' %}" class="nav-link nav-btn-exit">Salir</a>
+                {% else %}
+                    <a href="{% url 'finanzas:login' %}" class="nav-link">Iniciar Sesión</a>
+                    <a href="{% url 'finanzas:registro' %}" class="nav-link nav-btn-admin">Registrarse</a>
+                {% endif %}
+            </nav>
+
+        </div>
+    </header>
+
+    <main class="main-container">
+        {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="global-footer">
+        <div class="footer-content">
+            <div class="footer-brand">FAIR<span>BET</span> LAB</div>
+            <div class="footer-restriction">
+                Plataforma educativa · Moneda virtual · Sin valor comercial real
+            </div>
+            <div class="footer-responsible-gaming">
+                <strong>Juego Responsable:</strong> Esta simulación utiliza créditos virtuales sin valor comercial y ha sido desarrollada exclusivamente con fines académicos bajo el marco de la Ley N° 31557 y el DS N° 005-2023-MINCETUR.
+            </div>
+            <div class="footer-copyright">
+                &copy; 2026 FairBet Lab &mdash; Django & PostgreSQL
+            </div>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

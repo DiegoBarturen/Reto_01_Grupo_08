@@ -1,0 +1,437 @@
+{% extends "finanzas/base.html" %}
+
+{% block title %}Perfil | FairBet Lab{% endblock %}
+
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+    /* ── HERO ── */
+    .profile-hero {
+        background: var(--surface-1);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 28px 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        gap: 20px;
+        flex-wrap: wrap;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-hero::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    .hero-eyebrow {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 6px;
+    }
+
+    .hero-title {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 2.2rem;
+        letter-spacing: 0.05em;
+        color: var(--text);
+        margin: 0 0 6px;
+        line-height: 1;
+    }
+
+    .hero-lead {
+        color: var(--muted);
+        font-size: 0.88rem;
+        margin: 0;
+        max-width: 420px;
+        line-height: 1.6;
+    }
+
+    .hero-saldo {
+        background: var(--surface-2);
+        border: 1px solid var(--gold-border);
+        border-radius: var(--radius-sm);
+        padding: 16px 24px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .hero-saldo span {
+        display: block;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 4px;
+    }
+
+    .hero-saldo strong {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 2rem;
+        letter-spacing: 0.04em;
+        color: var(--green-neon);
+    }
+
+    /* ── GRID PERFIL ── */
+    .perfil-grid {
+        display: grid;
+        grid-template-columns: 3fr 2fr;
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    /* ── CARDS ── */
+    .card-panel {
+        background: var(--surface-1);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 24px;
+    }
+
+    .section-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 22px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .section-eyebrow {
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 4px;
+    }
+
+    .section-title {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 1.3rem;
+        letter-spacing: 0.05em;
+        color: var(--text);
+        margin: 0;
+    }
+
+    .section-chip {
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--gold);
+        background: var(--gold-dim);
+        border: 1px solid var(--gold-border);
+        padding: 4px 10px;
+        border-radius: 100px;
+        white-space: nowrap;
+    }
+
+    /* ── FORMS ── */
+    .form-grid {
+        display: grid;
+        gap: 16px;
+    }
+
+    .field {
+        display: grid;
+        gap: 6px;
+    }
+
+    .field label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+        width: 100%;
+        padding: 11px 14px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-md);
+        background: var(--surface-0);
+        color: var(--text);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.92rem;
+        font-weight: 500;
+        transition: border-color 0.15s, box-shadow 0.15s;
+        box-sizing: border-box;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+        outline: none;
+        border-color: var(--gold-border);
+        box-shadow: 0 0 0 3px var(--gold-dim);
+    }
+
+    .helptext {
+        font-size: 0.75rem;
+        color: var(--dim);
+        line-height: 1.5;
+    }
+
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .errorlist li {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--danger);
+        background: rgba(255,76,76,0.07);
+        border: 1px solid rgba(255,76,76,0.2);
+        padding: 6px 10px;
+        border-radius: var(--radius-sm);
+        margin-top: 4px;
+    }
+
+    .btn-submit {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        background: var(--gold);
+        color: #0A0B0E;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background 0.15s, transform 0.15s;
+        margin-top: 4px;
+    }
+
+    .btn-submit:hover {
+        background: var(--gold-light);
+        transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+        display: block;
+        width: 100%;
+        padding: 11px;
+        background: transparent;
+        color: var(--muted);
+        border: 1px solid var(--border-md);
+        border-radius: var(--radius-sm);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.88rem;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+
+    .btn-ghost:hover {
+        color: var(--text);
+        border-color: var(--border-md);
+        background: var(--surface-2);
+    }
+
+    /* ── PANEL NAVEGACIÓN ── */
+    .profile-exit {
+        margin-top: 20px;
+        padding-top: 18px;
+        border-top: 1px solid var(--border);
+        display: grid;
+        gap: 10px;
+    }
+
+    .profile-exit-label {
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--dim);
+    }
+
+    .profile-exit p {
+        font-size: 0.82rem;
+        color: var(--muted);
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    /* ── RESUMEN DE CUENTA ── */
+    .summary-list {
+        display: grid;
+        gap: 0;
+    }
+
+    .summary-list__item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 13px 0;
+        border-bottom: 1px solid var(--border);
+        gap: 12px;
+    }
+
+    .summary-list__item:last-child { border-bottom: none; }
+
+    .summary-list__item span {
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--muted);
+    }
+
+    .summary-list__item strong {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: var(--text);
+        text-align: right;
+    }
+
+    /* ── COLORES ROL ── */
+    .color-gold  { color: var(--gold); }
+    .color-green { color: var(--green-neon); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+        .perfil-grid { grid-template-columns: 1fr; }
+        .profile-hero { flex-direction: column; align-items: flex-start; }
+    }
+</style>
+
+<div class="profile-hero">
+    <div>
+        <div class="hero-eyebrow">
+            {% if request.user.is_staff %}Configuración Administrativa{% else %}Configuración{% endif %}
+        </div>
+        <h1 class="hero-title">Perfil de la Cuenta</h1>
+        <p class="hero-lead">Actualiza tus datos personales y administra la seguridad de acceso desde una sola pantalla.</p>
+    </div>
+
+    {% if not request.user.is_staff %}
+    <div class="hero-saldo">
+        <span>Saldo actual</span>
+        <strong>S/ {{ billetera.saldo }}</strong>
+    </div>
+    {% endif %}
+</div>
+
+<div class="perfil-grid">
+
+    <article class="card-panel">
+        <div class="section-heading">
+            <div>
+                <div class="section-eyebrow">Datos personales</div>
+                <h2 class="section-title">Información de la cuenta</h2>
+            </div>
+            <span class="section-chip">Editable</span>
+        </div>
+
+        <form method="post" class="form-grid">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="perfil">
+            {% for field in perfil_form %}
+                <div class="field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <div class="helptext">{{ field.help_text }}</div>
+                    {% endif %}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn-submit">Guardar cambios</button>
+        </form>
+    </article>
+
+    <div style="display: grid; gap: 20px; align-content: start;">
+
+        <article class="card-panel">
+            <div class="section-heading">
+                <div>
+                    <div class="section-eyebrow">Seguridad</div>
+                    <h2 class="section-title">Cambiar contraseña</h2>
+                </div>
+                <span class="section-chip">Protección</span>
+            </div>
+
+            <form method="post" class="form-grid">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="password">
+                {% for field in password_form %}
+                    <div class="field">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <div class="helptext">{{ field.help_text }}</div>
+                        {% endif %}
+                        {{ field.errors }}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn-submit">Actualizar contraseña</button>
+            </form>
+
+            <div class="profile-exit">
+                <span class="profile-exit-label">Navegación</span>
+
+                {% if request.user.is_staff %}
+                    <p>Cuando termines aquí, puedes volver a tu panel de control central.</p>
+                    <a href="{% url 'deportes:dashboard_admin' %}" class="btn-ghost">← Volver al Dashboard Admin</a>
+                {% else %}
+                    <p>Cuando termines aquí, puedes volver a la vista principal de tu billetera.</p>
+                    <a href="{% url 'finanzas:billetera' %}" class="btn-ghost">← Volver a Billetera</a>
+                {% endif %}
+            </div>
+        </article>
+
+        <article class="card-panel">
+            <div class="section-heading">
+                <div>
+                    <div class="section-eyebrow">Resumen de cuenta</div>
+                    <h2 class="section-title">Datos actuales</h2>
+                </div>
+            </div>
+
+            <div class="summary-list">
+                <div class="summary-list__item">
+                    <span>Usuario</span>
+                    <strong>{{ user.username }}</strong>
+                </div>
+                <div class="summary-list__item">
+                    <span>Nombre</span>
+                    <strong>{{ user.first_name }} {{ user.last_name|default:"" }}</strong>
+                </div>
+                <div class="summary-list__item">
+                    <span>Correo</span>
+                    <strong>{{ user.email }}</strong>
+                </div>
+                <div class="summary-list__item">
+                    <span>Rol</span>
+                    <strong class="{% if request.user.is_staff %}color-gold{% else %}color-green{% endif %}">
+                        {% if request.user.is_staff %}Administrador{% else %}Cliente{% endif %}
+                    </strong>
+                </div>
+            </div>
+        </article>
+
+    </div>
+</div>
+{% endblock %}

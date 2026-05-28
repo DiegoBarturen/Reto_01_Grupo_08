@@ -1,0 +1,139 @@
+{% extends "finanzas/base.html" %}
+
+{% block title %}Retirar Fondos | FairBet Lab{% endblock %}
+
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+    .finanzas-container { max-width: 600px; margin: 40px auto; font-family: 'DM Sans', sans-serif; }
+    
+    /* Botón Volver */
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 20px;
+        transition: color 0.2s, transform 0.2s;
+    }
+    .btn-back:hover { color: var(--gold); transform: translateX(-3px); }
+
+    .finanzas-header { text-align: center; margin-bottom: 30px; }
+    .finanzas-title { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--text); letter-spacing: 0.05em; margin: 0; }
+    
+    .card-panel {
+        background: var(--surface-1); border: 1px solid var(--border);
+        border-radius: var(--radius); padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .saldo-box {
+        display: flex; justify-content: space-between; align-items: center;
+        background: var(--surface-2); padding: 15px 20px; border-radius: var(--radius-sm);
+        border-left: 4px solid var(--gold); margin-bottom: 25px;
+    }
+    .saldo-box span { color: var(--muted); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .saldo-box strong { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: var(--gold); }
+
+    .input-group { margin-bottom: 20px; }
+    label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    
+    input[type="text"], input[type="number"], select {
+        width: 100%; background: var(--surface-2); border: 1px solid var(--border);
+        color: var(--text); padding: 12px 15px; border-radius: var(--radius-sm);
+        font-family: 'DM Sans', sans-serif; font-size: 1rem; transition: 0.2s; box-sizing: border-box;
+    }
+    input:focus, select:focus { outline: none; border-color: var(--gold); background: var(--surface-3); }
+
+    .monto-final {
+        background: rgba(255,59,59,0.05); border: 1px solid rgba(255,59,59,0.2);
+        padding: 20px; border-radius: var(--radius-sm); text-align: center; margin-bottom: 25px;
+    }
+    .monto-final label { color: var(--red-live); font-size: 0.85rem; margin-bottom: 10px; }
+    .monto-final input {
+        background: transparent; border: none; border-bottom: 2px solid var(--red-live);
+        border-radius: 0; color: var(--text); font-family: 'Bebas Neue', sans-serif;
+        font-size: 2.5rem; text-align: center; padding: 5px; width: 150px;
+    }
+
+    .btn-submit {
+        width: 100%; background: var(--surface-2); color: var(--text); border: 1px solid var(--border);
+        padding: 15px; font-family: 'DM Sans', sans-serif; font-size: 1.1rem; font-weight: 800;
+        text-transform: uppercase; letter-spacing: 0.05em; border-radius: var(--radius-sm);
+        cursor: pointer; transition: 0.2s;
+    }
+    .btn-submit:hover { border-color: var(--gold); color: var(--gold); background: var(--surface-3); }
+
+    .alert-error {
+        background: rgba(255,59,59,0.1); border-left: 4px solid var(--red-live);
+        padding: 15px; color: #FF6B6B; font-size: 0.85rem; margin-bottom: 20px; border-radius: var(--radius-sm);
+    }
+</style>
+
+<div class="finanzas-container">
+    <a href="{% url 'finanzas:billetera' %}" class="btn-back">← Volver al Dashboard</a>
+
+    <div class="finanzas-header">
+        <h1 class="finanzas-title">SOLICITAR RETIRO</h1>
+        <p style="color: var(--muted); margin-top: 5px;">Transfiere tus ganancias a tu cuenta bancaria</p>
+    </div>
+
+    <div class="card-panel">
+        
+        <div class="saldo-box">
+            <span>Saldo Disponible:</span>
+            <strong>S/ {{ billetera.saldo|floatformat:2 }}</strong>
+        </div>
+
+        {% if form.monto.errors %}
+            <div class="alert-error">
+                ❌ Error: {{ form.monto.errors.0 }}
+            </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'finanzas:retirar_saldo' %}">
+            {% csrf_token %}
+            
+            <input type="hidden" name="metodo" value="TRANSFERENCIA">
+
+            <div class="input-group">
+                <label>Método de Retiro Habilitado</label>
+                <input type="text" value="🏦 Transferencia Bancaria Nacional" disabled style="opacity: 0.7; cursor: not-allowed; color: var(--gold);">
+            </div>
+
+            <div class="input-row" style="display: flex; gap: 15px;">
+                <div class="input-group" style="flex: 1;">
+                    <label>Banco de Destino</label>
+                    <select required>
+                        <option value="BCP">BCP</option>
+                        <option value="BBVA">BBVA</option>
+                        <option value="INTERBANK">Interbank</option>
+                        <option value="SCOTIABANK">Scotiabank</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Número de Cuenta Interbancaria (CCI)</label>
+                <input type="text" placeholder="000 000 000000000000 00" maxlength="20" required>
+                <small style="color: var(--muted); font-size: 0.7rem; margin-top: 5px; display: block;">Debes ser el titular de la cuenta para procesar el pago.</small>
+            </div>
+
+            <div class="monto-final">
+                <label>Monto a Retirar (S/)</label>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <span style="font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--muted);">S/</span>
+                    <input type="number" name="monto" required min="1" max="{{ billetera.saldo|stringformat:'f' }}" step="0.01" placeholder="0.00">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">Solicitar Transferencia</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "finanzas/base.html" %}
+
+{% block title %}Editar Evento | FairBet Lab{% endblock %}
+
+{% block content %}
+<section class="auth-layout" style="grid-template-columns: 1fr; max-width: 850px; margin: 0 auto;">
+    <article class="auth-panel card">
+        <div class="auth-panel__header" style="text-align: center; margin-bottom: 30px;">
+            <div class="eyebrow" style="justify-content: center;">Modificación en Vivo</div>
+            <h2>Actualizar Partido #{{ evento.id }}</h2>
+            <p>Modifica el estado (ej. iniciar partido) o ajusta los multiplicadores de cuotas en tiempo real.</p>
+        </div>
+        
+        <form method="POST" class="form-grid">
+            {% csrf_token %}
+            <!-- Aquí copias exactamente los mismos campos de tu crear_partido.html -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="field" style="grid-column: 1 / -1;">
+                    <label style="color: var(--muted);">Categoría / Deporte</label>
+                    {{ evento_form.deporte }}
+                </div>
+                <div class="field">
+                    <label style="color: var(--muted);">Equipo Local</label>
+                    {{ evento_form.equipo_local }}
+                </div>
+                <div class="field">
+                    <label style="color: var(--muted);">Equipo Visitante</label>
+                    {{ evento_form.equipo_visitante }}
+                </div>
+                <div class="field">
+                    <label style="color: var(--muted);">Fecha y Hora</label>
+                    {{ evento_form.fecha_hora }}
+                </div>
+                <div class="field">
+                    <label style="color: var(--muted);">Estado Actual</label>
+                    {{ evento_form.estado }}
+                </div>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--line); padding: 24px; border-radius: var(--radius-md); margin-top: 10px; position: relative;">
+                <div class="eyebrow" style="position: absolute; top: -10px; left: 24px; background: var(--panel-strong); padding: 0 10px; color: var(--success);">
+                    Ajuste de Cuotas
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 10px;">
+                    <div class="field">
+                        <label style="text-align: center; color: var(--text);">Local (1)</label>
+                        {{ cuota_form.paga_local }}
+                    </div>
+                    <div class="field">
+                        <label style="text-align: center; color: var(--accent);">Empate (X)</label>
+                        {{ cuota_form.paga_empate }}
+                    </div>
+                    <div class="field">
+                        <label style="text-align: center; color: var(--text);">Visitante (2)</label>
+                        {{ cuota_form.paga_visitante }}
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 15px; margin-top: 20px;">
+                <button type="submit" class="button button--primary" style="flex: 1;">💾 Guardar Cambios</button>
+                <a href="{% url 'deportes:gestionar_eventos' %}" class="button button--ghost" style="flex: 1; text-align: center;">Cancelar</a>
+            </div>
+        </form>
+    </article>
+</section>
+
+<!-- Incluye aquí tu misma etiqueta <style> de crear_partido.html para que los inputs se vean oscuros -->
+<style>
+    .field select, .field input[type="text"], .field input[type="number"], .field input[type="datetime-local"] {
+        width: 100%; min-height: 52px; padding: 14px 16px; border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(5, 10, 18, 0.55);
+        color: var(--text); outline: none; transition: 0.2s; font-family: inherit; font-size: 1rem;
+    }
+    .field select:focus, .field input:focus {
+        border-color: rgba(255, 122, 26, 0.65); box-shadow: 0 0 0 4px rgba(255, 122, 26, 0.12);
+        background: rgba(6, 12, 20, 0.82);
+    }
+    ::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+</style>
+{% endblock %}

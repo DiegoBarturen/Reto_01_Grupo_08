@@ -1,0 +1,538 @@
+{% extends "finanzas/base.html" %}
+
+{% block title %}Mi Dashboard | FairBet Lab{% endblock %}
+
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+    :root {
+        --gold: #D4AF37;
+        --gold-light: #F2D06B;
+        --gold-dim: rgba(212,175,55,0.12);
+        --green-neon: #00E676;
+        --green-dim: rgba(0,230,118,0.1);
+        --red-live: #FF3B3B;
+        --surface-0: #0A0B0E;
+        --surface-1: #111318;
+        --surface-2: #181C24;
+        --surface-3: #1F242F;
+        --border: rgba(255,255,255,0.07);
+        --border-gold: rgba(212,175,55,0.3);
+        --text-primary: #F0F2F7;
+        --text-muted: #7A8199;
+        --text-dim: #4A5068;
+        --radius: 12px;
+        --radius-sm: 6px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body, .dashboard-root {
+        font-family: 'DM Sans', sans-serif;
+        background: var(--surface-0);
+        color: var(--text-primary);
+        min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    .db-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        margin-bottom: 28px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border);
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .db-eyebrow {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin: 0 0 4px;
+    }
+    .db-title {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 3rem;
+        letter-spacing: 0.04em;
+        line-height: 1;
+        margin: 0;
+        color: var(--text-primary);
+    }
+    .db-title span { color: var(--gold); }
+    .db-welcome {
+        margin: 6px 0 0;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+    .db-welcome strong {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    /* ── LIVE TICKER ── */
+    .live-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--red-live);
+        background: rgba(255,59,59,0.1);
+        border: 1px solid rgba(255,59,59,0.25);
+        padding: 5px 10px;
+        border-radius: 100px;
+    }
+    .live-dot {
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        background: var(--red-live);
+        animation: pulse-red 1.2s infinite;
+    }
+    @keyframes pulse-red {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.4; transform: scale(0.75); }
+    }
+
+    /* ── ACTION BUTTONS ── */
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 28px;
+        flex-wrap: wrap;
+    }
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 22px;
+        border-radius: var(--radius-sm);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.88rem;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        text-decoration: none;
+        transition: all 0.18s ease;
+        cursor: pointer;
+        border: none;
+        white-space: nowrap;
+    }
+    .btn-gold { background: var(--gold); color: #0A0B0E; }
+    .btn-gold:hover { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(212,175,55,0.35); }
+    .btn-sport { background: var(--green-dim); color: var(--green-neon); border: 1px solid rgba(0,230,118,0.25); }
+    .btn-sport:hover { background: rgba(0,230,118,0.18); border-color: rgba(0,230,118,0.5); transform: translateY(-1px); }
+    .btn-outline { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-outline:hover { color: var(--text-primary); border-color: rgba(255,255,255,0.2); background: var(--surface-2); }
+
+    /* ── KPI STRIP ── */
+    .kpi-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 14px;
+        margin-bottom: 28px;
+    }
+    .kpi-card {
+        background: var(--surface-1);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 20px 22px;
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.2s, transform 0.2s;
+    }
+    .kpi-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+        background: linear-gradient(90deg, transparent, var(--kpi-accent, var(--gold)), transparent);
+        opacity: 0; transition: opacity 0.2s;
+    }
+    .kpi-card:hover { border-color: var(--border-gold); transform: translateY(-2px); }
+    .kpi-card:hover::before { opacity: 1; }
+
+    .kpi-card.accent-green { --kpi-accent: var(--green-neon); }
+    .kpi-card.accent-gold  { --kpi-accent: var(--gold); }
+    .kpi-card.accent-orange { --kpi-accent: #FF8C42; }
+
+    .kpi-icon { font-size: 1.3rem; margin-bottom: 10px; opacity: 0.7; }
+    .kpi-title { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px; }
+    .kpi-value { font-family: 'Bebas Neue', sans-serif; font-size: 2.1rem; letter-spacing: 0.04em; line-height: 1; color: var(--text-primary); }
+    .kpi-value.success { color: var(--green-neon); }
+    .kpi-value.accent  { color: var(--gold); }
+
+    /* ── MAIN GRID ── */
+    .dashboard-content { display: grid; grid-template-columns: 3fr 2fr; gap: 20px; }
+
+    /* ── PANELS ── */
+    .card-panel {
+        background: var(--surface-1); border: 1px solid var(--border);
+        border-radius: var(--radius); padding: 24px; overflow: hidden;
+    }
+    .panel-header {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
+    }
+    .panel-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.25rem; letter-spacing: 0.06em; color: var(--text-primary); margin: 0; }
+    
+    .panel-link {
+        font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 700; color: var(--gold); text-decoration: none;
+        letter-spacing: 0.04em; padding: 5px 12px; background: var(--gold-dim);
+        border: 1px solid var(--border-gold); border-radius: var(--radius-sm); transition: all 0.15s; cursor: pointer;
+    }
+    .panel-link:hover { background: rgba(212,175,55,0.2); color: var(--gold-light); }
+    .panel-muted { font-size: 0.8rem; color: var(--text-dim); }
+
+    /* ── TABLE ── */
+    .panel-table { width: 100%; border-collapse: collapse; }
+    .panel-table th {
+        text-align: left; padding: 10px 10px; color: var(--text-dim);
+        font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.1em; border-bottom: 1px solid var(--border);
+    }
+    .panel-table td {
+        padding: 13px 10px; color: var(--text-muted); font-size: 0.88rem;
+        border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle;
+    }
+    .panel-table tbody tr { transition: background 0.15s; }
+    .panel-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+    .panel-table tbody tr:last-child td { border-bottom: none; }
+
+    /* ── MATCH CELL ── */
+    .match-name { color: var(--text-primary); font-weight: 600; font-size: 0.9rem; }
+    .match-vs { color: var(--text-dim); font-size: 0.82rem; font-weight: 400; }
+
+    /* ── ESTADO CHIPS ── */
+    .chip {
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 3px 9px; border-radius: 100px; font-size: 0.68rem;
+        font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+    }
+    .chip-pending { background: rgba(255, 193, 7, 0.12); color: #FFCA28; border: 1px solid rgba(255,193,7,0.25); }
+    .chip-won { background: var(--green-dim); color: var(--green-neon); border: 1px solid rgba(0,230,118,0.2); }
+    .chip-lost { background: rgba(255,59,59,0.1); color: #FF6B6B; border: 1px solid rgba(255,59,59,0.2); }
+
+    /* ── MONTO CON INDICADOR ── */
+    .amount { font-weight: 700; color: var(--text-primary); }
+    .tx-credit { color: var(--green-neon); font-weight: 800; }
+    .tx-debit  { color: #FF6B6B; font-weight: 800; }
+
+    .tx-type { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; }
+    .tx-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .tx-dot.credit { background: var(--green-neon); }
+    .tx-dot.debit  { background: #FF6B6B; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state { text-align: center; padding: 40px 20px; }
+    .empty-icon { font-size: 2.5rem; opacity: 0.2; margin-bottom: 12px; }
+    .empty-text { color: var(--text-dim); font-size: 0.9rem; margin: 0; }
+
+    /* ── DECORATIVE DIVIDER ── */
+    .divider-gold { height: 1px; background: linear-gradient(90deg, transparent, var(--gold-dim), transparent); margin: 0 0 24px; }
+
+    /* ── MODAL HISTORIAL COMPLETO ── */
+    .modal-overlay {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(10, 11, 14, 0.85); backdrop-filter: blur(5px);
+        display: none; align-items: center; justify-content: center;
+        z-index: 1000; padding: 20px; opacity: 0; transition: opacity 0.3s ease;
+    }
+    .modal-overlay.active { display: flex; opacity: 1; }
+    
+    .modal-content {
+        background: var(--surface-1); border: 1px solid var(--border);
+        border-radius: var(--radius); width: 100%; max-width: 900px;
+        max-height: 85vh; display: flex; flex-direction: column;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5); transform: translateY(20px);
+        transition: transform 0.3s ease;
+    }
+    .modal-overlay.active .modal-content { transform: translateY(0); }
+    
+    .modal-body { overflow-y: auto; padding: 0 24px 24px 24px; }
+    .btn-close {
+        background: transparent; border: none; color: var(--text-muted);
+        font-size: 1.5rem; cursor: pointer; transition: 0.2s; line-height: 1;
+    }
+    .btn-close:hover { color: var(--red-live); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+        .dashboard-content { grid-template-columns: 1fr; }
+        .action-buttons { flex-direction: column; }
+        .db-title { font-size: 2.2rem; }
+    }
+    @media (max-width: 500px) {
+        .kpi-container { grid-template-columns: 1fr 1fr; }
+    }
+</style>
+
+<div class="dashboard-root">
+
+    <div class="db-header">
+        <div class="db-header-left">
+            <p class="db-eyebrow">Panel de control</p>
+            <h1 class="db-title">FAIR<span>BET</span> LAB</h1>
+            <p class="db-welcome">Bienvenido de vuelta, <strong>{{ user.username }}</strong></p>
+        </div>
+        <div class="live-badge">
+            <span class="live-dot"></span>
+            En vivo
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <a href="{% url 'finanzas:recarga' %}" class="btn btn-gold">💰 Recargar Fichas</a>
+        <a href="{% url 'deportes:cartelera' %}" class="btn btn-sport">⚽ Cartelera Deportiva</a>
+        <a href="{% url 'finanzas:retiro' %}" class="btn btn-outline">💸 Solicitar Retiro</a>
+    </div>
+
+    <div class="divider-gold"></div>
+
+    <div class="kpi-container">
+        <div class="kpi-card accent-green">
+            <div class="kpi-icon">💳</div>
+            <div class="kpi-title">Saldo Disponible</div>
+            <div class="kpi-value success">S/ {{ billetera.saldo|floatformat:2 }}</div>
+        </div>
+        <div class="kpi-card accent-gold">
+            <div class="kpi-icon">🎟️</div>
+            <div class="kpi-title">Apuestas en Curso</div>
+            <div class="kpi-value accent">{{ apuestas_activas }}</div>
+        </div>
+        <div class="kpi-card accent-green">
+            <div class="kpi-icon">🏆</div>
+            <div class="kpi-title">Total Ganado (Histórico)</div>
+            <div class="kpi-value success">+ S/ {{ total_ganado|floatformat:2 }}</div>
+        </div>
+        <div class="kpi-card accent-orange">
+            <div class="kpi-icon">📊</div>
+            <div class="kpi-title">Inversión (Histórico)</div>
+            <div class="kpi-value" style="color:#FF8C42;">S/ {{ total_apostado|floatformat:2 }}</div>
+        </div>
+    </div>
+
+    <div class="dashboard-content">
+
+        <!-- PANEL DE APUESTAS -->
+        <div class="card-panel">
+            <div class="panel-header">
+                <h3 class="panel-title">🎟 Últimas Jugadas</h3>
+                <button type="button" onclick="openModal()" class="panel-link">Ver Historial →</button>
+            </div>
+
+            {% if ultimas_apuestas %}
+                <table class="panel-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Partido</th>
+                            <th>Selección</th>
+                            <th>Apostado</th>
+                            <th>Estado</th>
+                            <th style="text-align: right;">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for apuesta in ultimas_apuestas %}
+                        <tr>
+                            <td style="color: var(--text-dim); font-size: 0.82rem; font-variant-numeric: tabular-nums;">
+                                {{ apuesta.fecha_creacion|date:"d/m H:i" }}
+                            </td>
+                            <td>
+                                <span class="match-name">{{ apuesta.evento.equipo_local }}</span>
+                                <span class="match-vs"> vs {{ apuesta.evento.equipo_visitante }}</span>
+                            </td>
+                            <td style="font-weight: 600; color: var(--text-primary);">{{ apuesta.get_seleccion_display }}</td>
+                            <td class="amount">S/ {{ apuesta.monto_apostado }}</td>
+                            <td>
+                                {% if apuesta.estado == 'PENDIENTE' %}
+                                    <span class="chip chip-pending">Pendiente</span>
+                                {% elif apuesta.estado == 'GANADA' %}
+                                    <span class="chip chip-won">Ganada</span>
+                                {% else %}
+                                    <span class="chip chip-lost">{{ apuesta.estado }}</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: right;">
+                                <a href="{% url 'finanzas:descargar_ticket_apuesta_pdf' apuesta.id %}" class="panel-link" style="padding: 4px 8px; font-size: 0.75rem; background: transparent; border: 1px solid var(--border);" title="Descargar Ticket">
+                                    📥 
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">📋</div>
+                    <p class="empty-text">No tienes apuestas recientes.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- PANEL DE BILLETERA FINANCIERA -->
+        <div class="card-panel">
+            <form method="POST" action="{% url 'finanzas:descargar_transacciones_pdf' %}">
+                {% csrf_token %}
+                <div class="panel-header">
+                    <h3 class="panel-title">💳 Billetera</h3>
+                    <button type="submit" class="panel-link" title="Descargar movimientos seleccionados">📥 Descargar Lote</button>
+                </div>
+
+                {% if transacciones %}
+                    <table class="panel-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 30px;">
+                                    <input type="checkbox" id="selectAll" onclick="toggleCheckboxes(this)" style="accent-color: var(--gold);">
+                                </th>
+                                <th>Concepto</th>
+                                <th>Fecha</th>
+                                <th style="text-align: right;">Monto</th>
+                                <th style="text-align: right;">Recibo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for t in transacciones %}
+                            <tr>
+                                <td>
+                                    <input type="checkbox" name="transaccion_ids" value="{{ t.id }}" class="tx-checkbox" style="accent-color: var(--gold);">
+                                </td>
+                                <td>
+                                    {% if t.direccion == 'CREDIT' %}
+                                        <span class="tx-type">
+                                            <span class="tx-dot credit"></span>
+                                            <span style="color: var(--text-primary);">Ingreso</span>
+                                        </span>
+                                    {% else %}
+                                        <span class="tx-type">
+                                            <span class="tx-dot debit"></span>
+                                            <span style="color: var(--text-primary);">Egreso</span>
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td style="color: var(--text-dim); font-size: 0.8rem; font-variant-numeric: tabular-nums;">
+                                    {{ t.creado_en|date:"d/m H:i" }}
+                                </td>
+                                <td style="text-align: right;">
+                                    {% if t.direccion == 'CREDIT' %}
+                                        <span class="tx-credit">+ S/ {{ t.monto|floatformat:2 }}</span>
+                                    {% else %}
+                                        <span class="tx-debit">− S/ {{ t.monto|floatformat:2 }}</span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align: right;">
+                                    <a href="{% url 'finanzas:descargar_transaccion_pdf' t.id %}" class="panel-link" style="padding: 4px 8px; font-size: 0.75rem; background: transparent; border: 1px solid var(--border);" title="Descargar Recibo Individual">
+                                        🧾 
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">💸</div>
+                        <p class="empty-text">No hay movimientos financieros.</p>
+                    </div>
+                {% endif %}
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<!-- MODAL: HISTORIAL COMPLETO -->
+<div id="historialModal" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="panel-header" style="padding: 24px 24px 16px 24px; margin-bottom: 0;">
+            <div>
+                <h3 class="panel-title">Historial de Apuestas</h3>
+                <span class="panel-muted">Todos tus tickets registrados</span>
+            </div>
+            <button class="btn-close" onclick="closeModal()">✖</button>
+        </div>
+        
+        <div class="modal-body">
+            {% if user.apuestas.all %}
+                <table class="panel-table">
+                    <thead>
+                        <tr>
+                            <th>Ticket</th>
+                            <th>Fecha</th>
+                            <th>Evento</th>
+                            <th>Selección</th>
+                            <th>Cuota</th>
+                            <th>Monto</th>
+                            <th>Estado</th>
+                            <th style="text-align: right;">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for apuesta in user.apuestas.all|dictsortreversed:"fecha_creacion" %}
+                        <tr>
+                            <td style="font-family: 'Bebas Neue', sans-serif; color: var(--gold); font-size: 1rem; letter-spacing: 0.05em;">#{{ apuesta.id }}</td>
+                            <td style="color: var(--text-dim); font-size: 0.82rem; font-variant-numeric: tabular-nums;">
+                                {{ apuesta.fecha_creacion|date:"d/m/y" }}<br>{{ apuesta.fecha_creacion|date:"H:i" }}
+                            </td>
+                            <td>
+                                <span class="match-name" style="display: block;">{{ apuesta.evento.equipo_local }}</span>
+                                <span class="match-vs">vs {{ apuesta.evento.equipo_visitante }}</span>
+                            </td>
+                            <td style="font-weight: 600; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">{{ apuesta.get_seleccion_display }}</td>
+                            <td style="font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: var(--text-primary);">{{ apuesta.cuota_fijada }}</td>
+                            <td class="amount">S/ {{ apuesta.monto_apostado }}</td>
+                            <td>
+                                {% if apuesta.estado == 'PENDIENTE' %}
+                                    <span class="chip chip-pending">Pendiente</span>
+                                {% elif apuesta.estado == 'GANADA' %}
+                                    <span class="chip chip-won">Ganada</span>
+                                {% elif apuesta.estado == 'PERDIDA' %}
+                                    <span class="chip chip-lost">Perdida</span>
+                                {% else %}
+                                    <span class="chip chip-lost" style="background: rgba(255,255,255,0.05); color: var(--text-muted); border-color: var(--border);">{{ apuesta.estado }}</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: right;">
+                                <a href="{% url 'finanzas:descargar_ticket_apuesta_pdf' apuesta.id %}" class="panel-link" style="padding: 4px 8px; font-size: 0.75rem; background: transparent; border: 1px solid var(--border);" title="Descargar Ticket">
+                                    📥 PDF
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="empty-state" style="padding: 60px 20px;">
+                    <div class="empty-icon">🎟️</div>
+                    <p class="empty-text">Aún no has realizado ninguna apuesta.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleCheckboxes(source) {
+        checkboxes = document.querySelectorAll('.tx-checkbox');
+        for(var i=0, n=checkboxes.length; i<n; i++) {
+            checkboxes[i].checked = source.checked;
+        }
+    }
+
+    const modal = document.getElementById('historialModal');
+    
+    function openModal() {
+        modal.style.display = 'flex';
+        setTimeout(() => { modal.classList.add('active'); }, 10);
+    }
+
+    function closeModal(event) {
+        modal.classList.remove('active');
+        setTimeout(() => { modal.style.display = 'none'; }, 300);
+    }
+</script>
+
+{% endblock %}

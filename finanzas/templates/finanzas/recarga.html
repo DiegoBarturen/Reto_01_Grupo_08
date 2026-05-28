@@ -1,0 +1,298 @@
+{% extends "finanzas/base.html" %}
+
+{% block title %}Recargar Billetera | FairBet Lab{% endblock %}
+
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+    .finanzas-container {
+        max-width: 600px;
+        margin: 40px auto;
+        font-family: 'DM Sans', sans-serif;
+    }
+
+    /* Botón Volver */
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 20px;
+        transition: color 0.2s, transform 0.2s;
+    }
+    .btn-back:hover { color: var(--gold); transform: translateX(-3px); }
+
+    .finanzas-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .finanzas-title {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 2.5rem;
+        color: var(--text);
+        letter-spacing: 0.05em;
+        margin: 0;
+    }
+
+    .card-panel {
+        background: var(--surface-1);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    /* Selector de Método */
+    .method-selector {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .method-option {
+        flex: 1;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 15px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: var(--muted);
+        font-weight: 700;
+    }
+
+    .method-option:hover { border-color: var(--gold-border); color: var(--text); }
+    .method-option.active {
+        background: var(--gold-dim);
+        border-color: var(--gold);
+        color: var(--gold);
+        box-shadow: 0 0 15px rgba(212,175,55,0.1);
+    }
+
+    /* Paneles de Simulación */
+    .sim-panel {
+        background: var(--surface-0);
+        border: 1px solid var(--border-md);
+        border-radius: var(--radius-sm);
+        padding: 20px;
+        margin-bottom: 25px;
+        display: none;
+    }
+
+    .sim-panel.active { display: block; }
+
+    .sim-title {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--gold);
+        margin: 0 0 15px 0;
+        font-weight: 800;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 10px;
+    }
+
+    /* Inputs y Formularios */
+    .input-group { margin-bottom: 15px; }
+    .input-row { display: flex; gap: 15px; }
+    .input-row .input-group { flex: 1; }
+
+    label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 6px;
+    }
+
+    input[type="text"], input[type="number"] {
+        width: 100%;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 12px 15px;
+        border-radius: var(--radius-sm);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 1rem;
+        transition: 0.2s;
+        box-sizing: border-box;
+    }
+
+    input:focus { outline: none; border-color: var(--gold); background: var(--surface-3); }
+
+    /* Monto a recargar */
+    .monto-final {
+        background: var(--green-dim);
+        border: 1px solid rgba(0,230,118,0.2);
+        padding: 20px;
+        border-radius: var(--radius-sm);
+        text-align: center;
+        margin-bottom: 25px;
+    }
+    
+    .monto-final label { color: var(--green-neon); font-size: 0.85rem; margin-bottom: 10px; }
+    .monto-final input {
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid var(--green-neon);
+        border-radius: 0;
+        color: var(--text);
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 2.5rem;
+        text-align: center;
+        padding: 5px;
+        width: 150px;
+    }
+    .monto-final input:focus { background: transparent; border-bottom-color: #fff; }
+
+    /* Botón Submit */
+    .btn-submit {
+        width: 100%;
+        background: var(--gold);
+        color: #000;
+        border: none;
+        padding: 15px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .btn-submit:hover { background: var(--gold-light); transform: translateY(-2px); }
+
+    /* Datos Bancarios */
+    .bank-details {
+        background: var(--surface-2);
+        padding: 15px;
+        border-radius: var(--radius-sm);
+        margin-bottom: 15px;
+        font-size: 0.9rem;
+        color: var(--text);
+    }
+    .bank-details p { margin: 5px 0; }
+    .bank-details strong { color: var(--gold); }
+</style>
+
+<div class="finanzas-container">
+    <a href="{% url 'finanzas:billetera' %}" class="btn-back">← Volver al Dashboard</a>
+
+    <div class="finanzas-header">
+        <h1 class="finanzas-title">RECARGAR SALDO</h1>
+        <p style="color: var(--muted); margin-top: 5px;">Añade fondos a tu Billetera FairBet</p>
+    </div>
+
+    <div class="card-panel">
+        {% if form.monto.errors %}
+            <div style="background: rgba(255,59,59,0.1); border-left: 4px solid var(--red-live); padding: 15px; color: #FF6B6B; font-size: 0.85rem; margin-bottom: 20px; border-radius: var(--radius-sm);">
+                ❌ Error: {{ form.monto.errors.0 }}
+            </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'finanzas:recargar_saldo' %}" id="recarga-form">
+            {% csrf_token %}
+            
+            <input type="hidden" name="metodo" id="metodo-backend" value="TARJETA">
+
+            <label>Selecciona tu método de pago</label>
+            <div class="method-selector">
+                <div class="method-option active" id="btn-tarjeta" onclick="selectMethod('TARJETA')">
+                    💳 Tarjeta de Crédito/Débito
+                </div>
+                <div class="method-option" id="btn-transferencia" onclick="selectMethod('TRANSFERENCIA')">
+                    🏦 Transferencia Bancaria
+                </div>
+            </div>
+
+            <div class="sim-panel active" id="panel-tarjeta">
+                <h3 class="sim-title">Terminal de Pago Seguro (Simulación)</h3>
+                <div class="input-group">
+                    <label>Número de Tarjeta</label>
+                    <input type="text" placeholder="0000 0000 0000 0000" maxlength="19" oninput="formatearTarjeta(this)">
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Vencimiento (MM/AA)</label>
+                        <input type="text" placeholder="12/28" maxlength="5">
+                    </div>
+                    <div class="input-group">
+                        <label>CVV</label>
+                        <input type="text" placeholder="123" maxlength="4" type="password">
+                    </div>
+                </div>
+                <div class="input-group" style="margin-bottom: 0;">
+                    <label>Nombre del Titular</label>
+                    <input type="text" placeholder="EJ: JUAN PEREZ" value="{{ user.username|upper }}">
+                </div>
+            </div>
+
+            <div class="sim-panel" id="panel-transferencia">
+                <h3 class="sim-title">Datos para Transferencia (Simulación)</h3>
+                <div class="bank-details">
+                    <p>Banco: <strong>BCP (Banco de Crédito del Perú)</strong></p>
+                    <p>Titular: <strong>FAIRBET LAB S.A.C.</strong></p>
+                    <p>N° de Cuenta: <strong>193-98765432-0-12</strong></p>
+                    <p>CCI: <strong>00219300987654320121</strong></p>
+                </div>
+                <div class="input-group" style="margin-bottom: 0;">
+                    <label>Código de Operación (Voucher)</label>
+                    <input type="text" placeholder="Ej: 09876543" maxlength="12">
+                    <small style="color: var(--muted); font-size: 0.7rem; margin-top: 5px; display: block;">Simula ingresar el código de 8 dígitos de tu recibo.</small>
+                </div>
+            </div>
+
+            <div class="monto-final">
+                <label>Monto a Recargar (S/)</label>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <span style="font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--muted);">S/</span>
+                    <input type="number" name="monto" required min="1" step="0.01" placeholder="0.00" id="input-monto">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">Procesar Recarga Segura</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function selectMethod(method) {
+        document.getElementById('btn-tarjeta').classList.remove('active');
+        document.getElementById('btn-transferencia').classList.remove('active');
+        
+        document.getElementById('panel-tarjeta').classList.remove('active');
+        document.getElementById('panel-transferencia').classList.remove('active');
+
+        if(method === 'TARJETA') {
+            document.getElementById('btn-tarjeta').classList.add('active');
+            document.getElementById('panel-tarjeta').classList.add('active');
+        } else {
+            document.getElementById('btn-transferencia').classList.add('active');
+            document.getElementById('panel-transferencia').classList.add('active');
+        }
+
+        document.getElementById('metodo-backend').value = method;
+    }
+
+    function formatearTarjeta(input) {
+        let val = input.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+        let formatted = '';
+        for (let i = 0; i < val.length; i++) {
+            if (i > 0 && i % 4 === 0) formatted += ' ';
+            formatted += val[i];
+        }
+        input.value = formatted;
+    }
+</script>
+{% endblock %}

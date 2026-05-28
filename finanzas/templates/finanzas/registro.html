@@ -1,0 +1,81 @@
+{% extends "finanzas/base.html" %}
+{% load static %}
+
+{% block title %}Registro | FairBet Lab{% endblock %}
+
+{% block content %}
+<section class="auth-layout">
+    <article class="auth-showcase card card--glow">
+        <div class="eyebrow">Nuevo Usuario</div>
+        <h1>Crea tu cuenta y activa tu billetera virtual</h1>
+        <p class="lead">
+            Empieza con un flujo limpio de onboarding. Tu registro crea el usuario, prepara la billetera
+            y deja trazabilidad para el modulo financiero.
+        </p>
+
+        <div class="showcase-list">
+            <div class="showcase-list__item">
+                <strong>Cuenta centralizada</strong>
+                <span>Usuario autenticado con base en el sistema nativo de Django.</span>
+            </div>
+            <div class="showcase-list__item">
+                <strong>Billetera inicial</strong>
+                <span>Se genera automaticamente con saldo base en cero.</span>
+            </div>
+            <div class="showcase-list__item">
+                <strong>Auditoria</strong>
+                <span>Cada alta importante queda registrada para seguimiento.</span>
+            </div>
+        </div>
+    </article>
+
+    <article class="auth-panel card">
+        <div class="auth-panel__header">
+            <div class="eyebrow">Registro</div>
+            <h2>Crea tu perfil</h2>
+            <p>Completa los datos y deja lista tu cuenta para probar saldo, historial y recargas virtuales.</p>
+        </div>
+
+        <form method="post" class="form-grid">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.name == "password1" %}
+                        <div class="password-guide" data-password-guide data-validate-url="{% url 'finanzas:validar_contrasena' %}">
+                            <p class="password-guide__title">Tu contrasena debe cumplir con lo siguiente:</p>
+                            <ul class="password-guide__list">
+                                <li class="password-guide__item" data-rule="similar">
+                                    <span class="password-guide__icon" aria-hidden="true"></span>
+                                    <span>No debe parecerse demasiado a tus datos personales.</span>
+                                </li>
+                                <li class="password-guide__item" data-rule="min_length">
+                                    <span class="password-guide__icon" aria-hidden="true"></span>
+                                    <span>Debe contener al menos 8 caracteres.</span>
+                                </li>
+                                <li class="password-guide__item" data-rule="common">
+                                    <span class="password-guide__icon" aria-hidden="true"></span>
+                                    <span>No puede ser una contrasena de uso comun.</span>
+                                </li>
+                                <li class="password-guide__item" data-rule="numeric">
+                                    <span class="password-guide__icon" aria-hidden="true"></span>
+                                    <span>No puede estar compuesta solo por numeros.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    {% elif field.help_text %}
+                        <div class="helptext">{{ field.help_text }}</div>
+                    {% endif %}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+            <button type="submit" class="button button--primary button--full">Crear cuenta</button>
+        </form>
+    </article>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'finanzas/registro.js' %}"></script>
+{% endblock %}

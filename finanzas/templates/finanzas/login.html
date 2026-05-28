@@ -1,0 +1,292 @@
+{% extends "finanzas/base.html" %}
+
+{% block title %}Ingresar | FairBet Lab{% endblock %}
+
+{% block content %}
+<section class="auth-layout">
+    <article class="auth-showcase card card--glow">
+        <div class="eyebrow">Experiencia Deportiva</div>
+        <h1>Un acceso con estilo de jornada grande</h1>
+        <p class="lead">
+            Entra a una billetera virtual con una interfaz inspirada en plataformas deportivas modernas:
+            clara, rápida y lista para seguir creciendo.
+        </p>
+
+        <div class="showcase-grid">
+            <div class="showcase-tile">
+                <span class="showcase-tile__label">Seguridad</span>
+                <strong>Control de acceso</strong>
+                <p>Ingreso sencillo con autenticación integrada de Django.</p>
+            </div>
+            <div class="showcase-tile">
+                <span class="showcase-tile__label">Finanzas</span>
+                <strong>Movimientos visibles</strong>
+                <p>Saldo, recargas y trazabilidad presentados de forma ordenada.</p>
+            </div>
+            <div class="showcase-tile">
+                <span class="showcase-tile__label">Escalabilidad</span>
+                <strong>Base lista para crecer</strong>
+                <p>Una UI modular para sumar apuestas, cuotas y panel operador luego.</p>
+            </div>
+        </div>
+    </article>
+
+    <article class="auth-panel card">
+        <div class="auth-panel__header">
+            <div class="eyebrow">Ingreso</div>
+            <h2>Inicia sesión</h2>
+            <p>Usa tus credenciales para entrar a tu cuenta y revisar la billetera virtual.</p>
+        </div>
+
+        <form method="post" class="form-grid">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+            <button type="submit" class="button button--primary button--full">Ingresar a la plataforma</button>
+        </form>
+
+        <p class="auth-panel__meta">
+            Si aún no tienes cuenta, <a href="{% url 'finanzas:registro' %}">crea tu registro aquí</a>.
+        </p>
+    </article>
+</section>
+
+<!-- ========================================== -->
+<!-- CARTELERA LANDING (HOOK DE CONVERSIÓN)     -->
+<!-- ========================================== -->
+<style>
+    .landing-hero-cartelera {
+        padding: 60px 20px;
+        margin-top: 40px;
+        background: radial-gradient(ellipse at top, #181c24 0%, var(--surface-0) 100%);
+        border-top: 1px solid rgba(212,175,55,0.15);
+        position: relative;
+    }
+    
+    .lhc-header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+    
+    .lhc-title {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 3.5rem;
+        color: #fff;
+        margin: 0;
+        letter-spacing: 0.05em;
+        text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    
+    .lhc-title span { color: var(--gold); }
+    
+    .lhc-subtitle {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        margin-top: 10px;
+        font-weight: 500;
+    }
+
+    .lhc-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 24px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .lhc-card {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 16px;
+        padding: 26px;
+        backdrop-filter: blur(12px);
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s, border-color 0.3s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .lhc-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+        background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        opacity: 0; transition: 0.3s;
+    }
+
+    .lhc-card:hover {
+        transform: translateY(-8px);
+        border-color: rgba(212,175,55,0.3);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.4), 0 0 20px rgba(212,175,55,0.1);
+    }
+
+    .lhc-card:hover::before { opacity: 1; }
+
+    .lhc-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .lhc-sport-badge {
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: #000;
+        background: var(--gold);
+        padding: 4px 10px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .lhc-date {
+        font-size: 0.8rem;
+        color: var(--text-dim);
+        font-weight: 600;
+    }
+
+    .lhc-teams {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 28px;
+    }
+
+    .lhc-team {
+        display: flex;
+        align-items: center;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #fff;
+        gap: 12px;
+    }
+
+    .lhc-team::before {
+        content: ''; width: 8px; height: 8px;
+        border-radius: 50%; background: var(--text-muted);
+    }
+    
+    .lhc-team:first-child::before { background: var(--gold); }
+
+    .lhc-vs {
+        margin-left: 20px;
+        font-size: 0.75rem;
+        color: var(--text-dim);
+        font-weight: 800;
+        letter-spacing: 0.1em;
+    }
+
+    .lhc-odds { display: flex; gap: 10px; }
+
+    .lhc-odd-btn {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 0;
+        background: rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+
+    .lhc-odd-btn:hover {
+        background: var(--gold);
+        border-color: var(--gold);
+        transform: scale(1.05);
+    }
+
+    .lhc-odd-btn span.label {
+        font-size: 0.65rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-weight: 800;
+        margin-bottom: 6px;
+        letter-spacing: 0.05em;
+        transition: color 0.2s;
+    }
+
+    .lhc-odd-btn span.val {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 1.6rem;
+        color: var(--green-neon);
+        line-height: 1;
+        transition: color 0.2s;
+    }
+
+    .lhc-odd-btn:hover span.label,
+    .lhc-odd-btn:hover span.val { color: #0A0B0E; }
+    
+    /* Efecto "En vivo" si el partido arrancó */
+    .is-live { border-color: rgba(255,59,59,0.3); }
+    .is-live .lhc-sport-badge { background: var(--red-live); color: #fff; }
+    
+    /* Animación de actualización de cuotas */
+    @keyframes live-odd-pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; text-shadow: 0 0 10px var(--green-neon); }
+        100% { opacity: 1; }
+    }
+    
+    .lhc-card.is-live .lhc-odd-btn span.val {
+        animation: live-odd-pulse 3s infinite alternate;
+    }
+</style>
+
+<section class="landing-hero-cartelera">
+    <div class="lhc-header">
+        <h2 class="lhc-title">LA MEJOR <span>ACCIÓN</span> EN VIVO</h2>
+        <p class="lhc-subtitle">Selecciona tu pronóstico para iniciar sesión y empezar a ganar.</p>
+    </div>
+    
+    <div class="lhc-grid">
+        {% for evento in eventos_destacados %}
+        <div class="lhc-card {% if evento.estado == 'EN_JUEGO' %}is-live{% endif %}">
+            <div class="lhc-meta">
+                <span class="lhc-sport-badge">
+                    {% if evento.estado == 'EN_JUEGO' %}🔴 EN VIVO{% else %}{{ evento.get_deporte_display }}{% endif %}
+                </span>
+                <span class="lhc-date">{{ evento.fecha_hora|date:"d M - H:i" }}</span>
+            </div>
+            
+            <div class="lhc-teams">
+                <div class="lhc-team">{{ evento.equipo_local }}</div>
+                <div class="lhc-vs">VS</div>
+                <div class="lhc-team">{{ evento.equipo_visitante }}</div>
+            </div>
+            
+            <div class="lhc-odds">
+                {% if evento.cuotas %}
+                    <a href="{% url 'finanzas:login' %}" class="lhc-odd-btn" title="Inicia sesión para apostar al Local">
+                        <span class="label">Local</span>
+                        <span class="val">{{ evento.cuotas.paga_local }}</span>
+                    </a>
+                    <a href="{% url 'finanzas:login' %}" class="lhc-odd-btn" title="Inicia sesión para apostar al Empate">
+                        <span class="label">Empate</span>
+                        <span class="val">{{ evento.cuotas.paga_empate }}</span>
+                    </a>
+                    <a href="{% url 'finanzas:login' %}" class="lhc-odd-btn" title="Inicia sesión para apostar a la Visita">
+                        <span class="label">Visita</span>
+                        <span class="val">{{ evento.cuotas.paga_visitante }}</span>
+                    </a>
+                {% else %}
+                    <div style="width: 100%; text-align: center; color: var(--text-dim); padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+                        Cuotas preparándose...
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+            <p style="text-align: center; color: var(--text-muted); grid-column: 1/-1; font-size: 1.2rem;">
+                Las mejores cuotas se están cocinando. Vuelve en un momento.
+            </p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

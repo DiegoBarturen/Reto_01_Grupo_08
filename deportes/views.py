@@ -7,7 +7,7 @@ from .models import Evento, Cuota
 from .forms import EventoForm, CuotaForm
 from apuestas.models import Apuesta
 from finanzas.models import LedgerEntry, Billetera
-
+from django.db import transaction
 
 def cartelera(request):
     billetera_usuario = None
@@ -112,14 +112,21 @@ def editar_evento(request, evento_id):
 def eliminar_evento(request, evento_id):
     evento = get_object_or_404(Evento, id=evento_id)
     
-    if evento.estado not in ['FINALIZADO', 'ANULADO']:
+    # =========================================================
+    # REGLA 1: El evento debe estar FINALIZADO o SUSPENDIDO
+    # =========================================================
+    # CORRECCIÓN: Cambiamos 'ANULADO' por 'SUSPENDIDO'
+    if evento.estado not in ['FINALIZADO', 'SUSPENDIDO']:
         messages.error(
             request, 
             f'🛑 DENEGADO: El partido está "{evento.get_estado_display()}". '
-            'Solo puedes eliminar eventos que ya hayan finalizado o sido anulados.'
+            'Solo puedes eliminar eventos que ya hayan finalizado o sido suspendidos.'
         )
         return redirect('deportes:gestionar_eventos')
 
+    # =========================================================
+    # REGLA 2: No deben existir apuestas "PENDIENTES" de pago
+    # =========================================================
     apuestas_pendientes = Apuesta.objects.filter(evento=evento, estado='PENDIENTE')
     
     if apuestas_pendientes.exists():
@@ -131,17 +138,77 @@ def eliminar_evento(request, evento_id):
         )
         return redirect('deportes:gestionar_eventos')
 
+    # =========================================================
+    # EJECUCIÓN: Si pasa las reglas, se elimina de forma segura
+    # =========================================================
     try:
+        # 1. Borramos el historial de tickets para evitar el ProtectedError
         Apuesta.objects.filter(evento=evento).delete()
         
+        # 2. Borramos el evento
         evento.delete()
         
         messages.success(
             request, 
             f'✅ ÉXITO: El partido "{evento.equipo_local} vs {evento.equipo_visitante}" '
-            'y su historial liquidado han sido eliminados del sistema.'
+            'y su historial han sido eliminados del sistema.'
         )
     except Exception as e:
         messages.error(request, f'❌ Ocurrió un error en el servidor: {str(e)}')
         
     return redirect('deportes:gestionar_eventos')
+
+# ==========================================
+# MÓDULO DE LIQUIDACIÓN MASIVA
+# ==========================================
+
+@staff_member_required(login_url='finanzas:login')
+def panel_liquidar(request):
+    """Muestra solo los partidos que tienen apuestas pendientes por pagar"""
+    # Buscamos los IDs de los eventos que tienen al menos 1 apuesta pendiente
+    eventos_ids = Apuesta.objects.filter(estado='PENDIENTE').values_list('evento_id', flat=True).distinct()
+    eventos = Evento.objects.filter(id__in=eventos_ids).order_by('fecha_hora')
+    
+    return render(request, 'deportes/panel_liquidar.html', {'eventos': eventos})
+
+@staff_member_required(login_url='finanzas:login')
+@transaction.atomic 
+def liquidar_partido(request, evento_id):
+    """Liquida todas las apuestas de un partido de un solo golpe"""
+    evento = get_object_or_404(Evento, id=evento_id)
+    apuestas_pendientes = Apuesta.objects.filter(evento=evento, estado='PENDIENTE').select_related('usuario')
+
+    if request.method == 'POST':
+        resultado_partido = request.POST.get('resultado')
+        
+        if resultado_partido in ['LOCAL', 'EMPATE', 'VISITANTE']:
+            for apuesta in apuestas_pendientes:
+                if apuesta.seleccion == resultado_partido:
+                    apuesta.estado = 'GANADA'
+                    
+                    billetera = Billetera.objects.get(usuario=apuesta.usuario)
+                    billetera.saldo += apuesta.ganancia_potencial
+                    billetera.save()
+                    
+                    LedgerEntry.objects.create(
+                        billetera=billetera,
+                        monto=apuesta.ganancia_potencial,
+                        direccion='CREDIT',
+                        descripcion=f"Premio Ticket #{apuesta.id} ({evento.equipo_local[:3]}v{evento.equipo_visitante[:3]})",
+                        transaction_id=str(uuid.uuid4().hex[:10]).upper()
+                    )
+                else:
+                    apuesta.estado = 'PERDIDA'
+                
+                apuesta.save()
+                
+            evento.estado = 'FINALIZADO'
+            evento.save()
+            
+            messages.success(request, f'¡Liquidación Masiva Completada! Ganador oficial: {resultado_partido}. Se ha pagado automáticamente a todos los ganadores.')
+            return redirect('deportes:panel_liquidar')
+            
+    return render(request, 'deportes/liquidar_detalle.html', {
+        'evento': evento,
+        'apuestas': apuestas_pendientes
+    })

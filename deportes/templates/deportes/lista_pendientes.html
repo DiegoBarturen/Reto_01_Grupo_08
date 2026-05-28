@@ -1,55 +1,57 @@
 {% extends "finanzas/base.html" %}
-{% block title %}Liquidar Apuestas | FairBet Lab{% endblock %}
+
+{% block title %}Liquidar Apuestas | FairBet Admin{% endblock %}
+
 {% block content %}
-<div class="card">
-    <div class="section-heading">
-        <h2>Apuestas Pendientes de Liquidación</h2>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap');
+    
+    .admin-container { max-width: 900px; margin: 40px auto; font-family: 'DM Sans', sans-serif; }
+    .page-title { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--text); letter-spacing: 0.05em; margin: 0 0 5px 0; }
+    
+    .evento-row {
+        background: var(--surface-1); border: 1px solid var(--border);
+        border-radius: var(--radius); padding: 20px; margin-bottom: 15px;
+        display: flex; justify-content: space-between; align-items: center;
+        transition: 0.2s;
+    }
+    .evento-row:hover { border-color: var(--gold); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(212,175,55,0.1); }
+    
+    .match-info h3 { margin: 0; color: var(--text); font-size: 1.2rem; }
+    .match-meta { font-size: 0.8rem; color: var(--muted); margin-top: 5px; }
+    
+    .btn-liquidar {
+        background: var(--gold); color: #0A0B0E; padding: 10px 20px;
+        border-radius: var(--radius-sm); text-decoration: none;
+        font-weight: 800; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em;
+    }
+    .btn-liquidar:hover { background: var(--gold-light); }
+</style>
+
+<div class="admin-container">
+    <a href="{% url 'deportes:gestionar_eventos' %}" style="color: var(--gold); text-decoration: none; font-weight: 700; font-size: 0.85rem;">← Volver a la Gestión</a>
+    
+    <div style="margin-bottom: 30px; margin-top: 15px;">
+        <h1 class="page-title">LIQUIDACIÓN DE PARTIDOS</h1>
+        <p style="color: var(--muted);">Partidos con apuestas pendientes que requieren ser cerrados masivamente.</p>
     </div>
 
-    <form method="get" class="admin-filter-bar" style="background: var(--panel-strong); padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 10px;">
-        {{ filter.form.as_p }}
-        <button type="submit" class="button button--primary">Filtrar</button>
-        <a href="." class="button">Limpiar</a>
-    </form>
-
-    <table class="transactions-table">
-        <thead>
-            <tr>
-                <th>Usuario</th>
-                <th>Evento</th>
-                <th>Monto</th>
-                <th>Ganancia Potencial</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for apuesta in page_obj %}
-            <tr>
-                <td>{{ apuesta.usuario.username }}</td>
-                <td>{{ apuesta.evento }}</td>
-                <td>S/ {{ apuesta.monto_apostado }}</td>
-                <td>S/ {{ apuesta.ganancia_potencial }}</td>
-                <td>
-                    <a href="{% url 'apuestas:liquidar_apuesta' apuesta.id 'GANADA' %}" class="button-success">✔</a>
-                    <a href="{% url 'apuestas:liquidar_apuesta' apuesta.id 'PERDIDA' %}" class="button-danger">✘</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="5" style="text-align: center; padding: 20px; color: var(--muted);">No hay apuestas pendientes para liquidar.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <div class="pagination" style="display: flex; align-items: center; gap: 12px; margin-top: 20px; justify-content: center;">
-        {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}" class="button">Anterior</a>
-        {% endif %}
-        <span style="color: var(--muted); font-size: 0.9rem;">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-        {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}" class="button">Siguiente</a>
-        {% endif %}
+    {% for evento in eventos %}
+    <div class="evento-row">
+        <div class="match-info">
+            <h3>{{ evento.equipo_local }} <span style="color: var(--gold);">vs</span> {{ evento.equipo_visitante }}</h3>
+            <div class="match-meta">📅 {{ evento.fecha_hora|date:"d/m/Y H:i" }} | 🏟️ {{ evento.get_deporte_display }} | 🔴 {{ evento.get_estado_display }}</div>
+        </div>
+        <div>
+            <a href="{% url 'apuestas:liquidar_evento' evento.id %}" class="btn-liquidar">Procesar Ganadores →</a>
+        </div>
     </div>
+    {% empty %}
+        <div style="text-align: center; padding: 50px; background: var(--surface-1); border-radius: var(--radius); border: 1px dashed var(--border);">
+            <div style="font-size: 2.5rem; margin-bottom: 10px;">🚀</div>
+            <h3 style="color: var(--text); margin: 0;">Todo al día</h3>
+            <p style="color: var(--muted); margin-top: 5px;">No hay partidos pendientes de liquidación en este momento.</p>
+        </div>
+    {% endfor %}
 </div>
 {% endblock %}

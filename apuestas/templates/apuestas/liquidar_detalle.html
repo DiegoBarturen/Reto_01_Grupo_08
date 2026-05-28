@@ -1,0 +1,101 @@
+{% extends "finanzas/base.html" %}
+
+{% block title %}Procesar Liquidación | FairBet Admin{% endblock %}
+
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap');
+    
+    .admin-container { max-width: 900px; margin: 40px auto; font-family: 'DM Sans', sans-serif; }
+    .panel-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius); padding: 30px; }
+    
+    .match-header { text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 25px; margin-bottom: 25px; }
+    .match-header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--text); letter-spacing: 0.05em; margin: 0; }
+    .match-header p { color: var(--muted); margin-top: 5px; }
+
+    /* Los 3 grandes botones de resultado */
+    .action-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 30px; }
+    
+    .btn-resultado {
+        background: var(--surface-2); border: 2px solid var(--border); color: var(--text);
+        padding: 20px; border-radius: var(--radius-sm); cursor: pointer; transition: 0.2s;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .btn-resultado span.titulo { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px; font-weight: 700; }
+    .btn-resultado span.equipo { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 0.05em; line-height: 1; text-align: center; }
+    
+    .btn-resultado:hover { background: var(--surface-3); transform: translateY(-3px); }
+    .btn-resultado.local:hover { border-color: var(--gold); }
+    .btn-resultado.empate:hover { border-color: var(--text-muted); }
+    .btn-resultado.visita:hover { border-color: var(--green-neon); }
+
+    /* Tabla de apuestas */
+    table { width: 100%; border-collapse: collapse; margin-top: 30px; }
+    th { text-align: left; padding: 10px; color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid var(--border); }
+    td { padding: 12px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; color: var(--text); }
+</style>
+
+<div class="admin-container">
+    <a href="{% url 'apuestas:lista_pendientes' %}" style="color: var(--gold); text-decoration: none; font-weight: 700; font-size: 0.85rem;">← Atrás</a>
+    
+    <div class="panel-card" style="margin-top: 15px;">
+        <div class="match-header">
+            <h2>{{ evento.equipo_local }} <span style="color: var(--gold);">VS</span> {{ evento.equipo_visitante }}</h2>
+            <p>Selecciona el resultado real. El sistema pagará automáticamente a los ganadores.</p>
+        </div>
+
+        <form method="POST" id="liquidar-form">
+            {% csrf_token %}
+            <input type="hidden" name="resultado" id="input-resultado">
+            
+            <div class="action-grid">
+                <button type="button" class="btn-resultado local" onclick="confirmarLiquidacion('LOCAL', '{{ evento.equipo_local|escapejs }}')">
+                    <span class="titulo">Ganó Local</span>
+                    <span class="equipo">{{ evento.equipo_local }}</span>
+                </button>
+                <button type="button" class="btn-resultado empate" onclick="confirmarLiquidacion('EMPATE', 'Empate')">
+                    <span class="titulo">Terminó en</span>
+                    <span class="equipo">EMPATE</span>
+                </button>
+                <button type="button" class="btn-resultado visita" onclick="confirmarLiquidacion('VISITANTE', '{{ evento.equipo_visitante|escapejs }}')">
+                    <span class="titulo">Ganó Visita</span>
+                    <span class="equipo">{{ evento.equipo_visitante }}</span>
+                </button>
+            </div>
+        </form>
+
+        <h3 style="margin-top: 40px; border-bottom: 1px solid var(--border); padding-bottom: 10px; color: var(--gold);">Tickets a procesar ({{ apuestas.count }})</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Ticket</th>
+                    <th>Pronóstico</th>
+                    <th>Monto Apostado</th>
+                    <th>Premio a Pagar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for apuesta in apuestas %}
+                <tr>
+                    <td style="font-weight: 700;">{{ apuesta.usuario.username }}</td>
+                    <td>#{{ apuesta.id }}</td>
+                    <td style="color: var(--gold); font-weight: bold;">{{ apuesta.get_seleccion_display }}</td>
+                    <td>S/ {{ apuesta.monto_apostado }}</td>
+                    <td style="color: var(--green-neon); font-weight: 800;">S/ {{ apuesta.ganancia_potencial }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function confirmarLiquidacion(codigo, nombre) {
+        if(confirm(`⚠️ ATENCIÓN: ¿Estás seguro que el resultado final fue "${nombre}"?\n\nAl aceptar, se repartirá el dinero a los ganadores de forma irreversible.`)) {
+            document.getElementById('input-resultado').value = codigo;
+            document.getElementById('liquidar-form').submit();
+        }
+    }
+</script>
+{% endblock %}

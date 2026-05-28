@@ -8,23 +8,6 @@ from django.contrib import messages
 from .models import Apuesta
 from deportes.models import Evento, Cuota
 from finanzas.models import Billetera, LedgerEntry
-from django.core.paginator import Paginator
-from .filters import ApuestaFilter
-
-@staff_member_required(login_url='finanzas:login')
-def lista_pendientes(request):
-    qs = Apuesta.objects.filter(estado=Apuesta.Estado.PENDIENTE).select_related('usuario', 'evento')
-    
-    f = ApuestaFilter(request.GET, queryset=qs)
-    
-    paginator = Paginator(f.qs, 20)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    return render(request, 'deportes/lista_pendientes.html', {
-        'filter': f,
-        'page_obj': page_obj
-    })
 
 @login_required
 @transaction.atomic
@@ -43,7 +26,7 @@ def realizar_apuesta(request):
         evento = get_object_or_404(Evento, id=evento_id)
         cuota_obj = get_object_or_404(Cuota, evento=evento)
         
-        if evento.estado == 'FINALIZADO':
+        if evento.estado == 'FINALIZADO' or evento.estado == 'SUSPENDIDO':
             messages.error(request, "Este evento ya no acepta apuestas.")
             return redirect('deportes:cartelera')
 
@@ -81,39 +64,59 @@ def realizar_apuesta(request):
     return redirect('deportes:cartelera')
 
 @staff_member_required(login_url='finanzas:login')
+def lista_pendientes(request):
+    """Muestra los partidos que tienen apuestas por liquidar"""
+    eventos_ids = Apuesta.objects.filter(estado=Apuesta.Estado.PENDIENTE).values_list('evento_id', flat=True).distinct()
+    eventos = Evento.objects.filter(id__in=eventos_ids).order_by('fecha_hora')
+    
+    return render(request, 'deportes/lista_pendientes.html', {'eventos': eventos})
+
+
+@staff_member_required(login_url='finanzas:login')
 @transaction.atomic
-def liquidar_apuesta(request, apuesta_id, resultado):
-    """Función para el Administrador: define si la casa paga o cobra"""
-    apuesta = get_object_or_404(Apuesta.objects.select_for_update(), id=apuesta_id)
+def liquidar_evento(request, evento_id):
+    evento = get_object_or_404(Evento, id=evento_id)
     
-    if apuesta.estado != Apuesta.Estado.PENDIENTE:
-        messages.error(request, "Esta apuesta ya fue liquidada previamente.")
-        return redirect('apuestas:lista_pendientes')
+    apuestas_pendientes = Apuesta.objects.select_for_update().filter(evento=evento, estado=Apuesta.Estado.PENDIENTE).select_related('usuario')
 
-    billetera_usuario = Billetera.objects.get(usuario=apuesta.usuario)
-    billetera_casa, _ = Billetera.objects.get_or_create(tipo=Billetera.TipoCuenta.CASA)
-    billetera_pendientes, _ = Billetera.objects.get_or_create(tipo=Billetera.TipoCuenta.PENDIENTES)
+    if request.method == 'POST':
+        resultado_partido = request.POST.get('resultado') # 'LOCAL', 'EMPATE' o 'VISITANTE'
+        
+        if resultado_partido in ['LOCAL', 'EMPATE', 'VISITANTE']:
+            billetera_casa, _ = Billetera.objects.get_or_create(tipo=Billetera.TipoCuenta.CASA)
+            billetera_pendientes, _ = Billetera.objects.get_or_create(tipo=Billetera.TipoCuenta.PENDIENTES)
 
-    tx_id = uuid.uuid4()
-    
-    monto_apostado = apuesta.monto_apostado 
-    ganancia_neta = apuesta.ganancia_potencial - monto_apostado
+            for apuesta in apuestas_pendientes:
+                billetera_usuario = Billetera.objects.get(usuario=apuesta.usuario)
+                tx_id = uuid.uuid4()
+                
+                monto_apostado = apuesta.monto_apostado 
+                ganancia_neta = apuesta.ganancia_potencial - monto_apostado
 
-    if resultado == 'GANADA':
-        LedgerEntry.objects.create(billetera=billetera_pendientes, transaction_id=tx_id, direccion=LedgerEntry.Direccion.DEBIT, monto=monto_apostado, descripcion=f"Devolución de custodia - Apuesta #{apuesta.id}")
-        LedgerEntry.objects.create(billetera=billetera_usuario, transaction_id=tx_id, direccion=LedgerEntry.Direccion.CREDIT, monto=monto_apostado, descripcion=f"Devolución de stake - Apuesta #{apuesta.id}")
-        
-        if ganancia_neta > 0:
-            LedgerEntry.objects.create(billetera=billetera_casa, transaction_id=tx_id, direccion=LedgerEntry.Direccion.DEBIT, monto=ganancia_neta, descripcion=f"Pago de ganancia - Apuesta #{apuesta.id}")
-            LedgerEntry.objects.create(billetera=billetera_usuario, transaction_id=tx_id, direccion=LedgerEntry.Direccion.CREDIT, monto=ganancia_neta, descripcion=f"Premio ganado - Apuesta #{apuesta.id}")
-        
-        apuesta.estado = Apuesta.Estado.GANADA
-    else:
-        LedgerEntry.objects.create(billetera=billetera_pendientes, transaction_id=tx_id, direccion=LedgerEntry.Direccion.DEBIT, monto=monto_apostado, descripcion=f"Cierre de custodia - Apuesta perdida #{apuesta.id}")
-        LedgerEntry.objects.create(billetera=billetera_casa, transaction_id=tx_id, direccion=LedgerEntry.Direccion.CREDIT, monto=monto_apostado, descripcion=f"Ingreso por apuesta perdida #{apuesta.id}")
-        
-        apuesta.estado = Apuesta.Estado.PERDIDA
-    
-    apuesta.save()
-    messages.success(request, f"Apuesta #{apuesta.id} marcada como {resultado}.")
-    return redirect('apuestas:lista_pendientes')
+                if apuesta.seleccion == resultado_partido:
+                    LedgerEntry.objects.create(billetera=billetera_pendientes, transaction_id=tx_id, direccion=LedgerEntry.Direccion.DEBIT, monto=monto_apostado, descripcion=f"Devolución custodia - Apuesta #{apuesta.id}")
+                    LedgerEntry.objects.create(billetera=billetera_usuario, transaction_id=tx_id, direccion=LedgerEntry.Direccion.CREDIT, monto=monto_apostado, descripcion=f"Devolución de stake - Apuesta #{apuesta.id}")
+                    
+                    if ganancia_neta > 0:
+                        LedgerEntry.objects.create(billetera=billetera_casa, transaction_id=tx_id, direccion=LedgerEntry.Direccion.DEBIT, monto=ganancia_neta, descripcion=f"Pago de ganancia - Apuesta #{apuesta.id}")
+                        LedgerEntry.objects.create(billetera=billetera_usuario, transaction_id=tx_id, direccion=LedgerEntry.Direccion.CREDIT, monto=ganancia_neta, descripcion=f"Premio ganado - Apuesta #{apuesta.id}")
+                    
+                    apuesta.estado = Apuesta.Estado.GANADA
+                else:
+                    LedgerEntry.objects.create(billetera=billetera_pendientes, transaction_id=tx_id, direccion=LedgerEntry.Direccion.DEBIT, monto=monto_apostado, descripcion=f"Cierre de custodia - Apuesta perdida #{apuesta.id}")
+                    LedgerEntry.objects.create(billetera=billetera_casa, transaction_id=tx_id, direccion=LedgerEntry.Direccion.CREDIT, monto=monto_apostado, descripcion=f"Ingreso por apuesta perdida #{apuesta.id}")
+                    
+                    apuesta.estado = Apuesta.Estado.PERDIDA
+                
+                apuesta.save()
+                
+            evento.estado = 'FINALIZADO'
+            evento.save()
+            
+            messages.success(request, f'¡Liquidación Masiva Completada! El sistema procesó los pagos al Ledger con resultado: {resultado_partido}.')
+            return redirect('apuestas:lista_pendientes')
+            
+    return render(request, 'apuestas/liquidar_detalle.html', {
+        'evento': evento,
+        'apuestas': apuestas_pendientes
+    })
